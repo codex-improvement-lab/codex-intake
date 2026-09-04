@@ -29,6 +29,10 @@ const requiredFiles = [
   "release/MACOS_VALIDATION_RESULT.template.md",
   "release/REPLACEMENT_CANDIDATE.json",
   "release/RELEASE_NOTES_v0.1.0.md",
+  "release/RELEASE_NOTES_v0.2.0-rc.1.md",
+  "src/core/source-updates.js",
+  "tests/source-updates.test.js",
+  "vitest.config.js",
   "scripts/check-macos-design.mjs",
   "scripts/check-marketplace.mjs",
   "scripts/prepare-marketplace.mjs",
@@ -50,9 +54,10 @@ for (const relative of requiredFiles) {
 }
 
 const manifest = JSON.parse(await readFile(path.join(root, ".codex-plugin", "plugin.json"), "utf8"));
+const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 if (manifest.name !== "codex-intake") failures.push("Plugin manifest name must be codex-intake.");
-if (!/^0\.1\.0\+codex\.\d{14}$/.test(manifest.version)) {
-  failures.push("Plugin manifest must carry exactly one timestamped v0.1.0 Codex replacement-candidate cachebuster.");
+if (!manifest.version.startsWith(`${packageJson.version}+codex.`) || !/\+codex\.\d{14}$/.test(manifest.version)) {
+  failures.push("Plugin manifest must match the package version plus one timestamped Codex cachebuster.");
 }
 if (manifest.license !== "MIT") failures.push("Plugin manifest must declare MIT.");
 if (manifest.apps || manifest.mcpServers) failures.push("MVP manifest must not claim an unimplemented MCP or app integration.");

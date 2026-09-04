@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0-rc.1",
+  "scope": "Windows automated and synthetic browser validation",
+  "exitCode": 0,
+  "publicImagesUnchanged": true,
+  "images": {
+    "assets/codex-intake-overview.png": "371e1df38e53587c8e3f68b22f30888fe2fef331a7ca366ec4286420a60d898c",
+    "assets/codex-intake-full.png": "5577453fe5716838594a4959c05ec5ac2af9dd6bef054a25da74c2ca01335021",
+    "assets/source-update-review.png": "9e2105ef18fc137b91a0946bb6894a1a3bb7e53e5d7db214cd80807d4e003286",
+    "assets/source-update-review-mobile.png": "821d1409778e68276d0c42dc2550cbde7972aca43de36332d479e800d056b998"
+  },
+  "coreTests": {
+    "passed": 26,
+    "failed": 0
+  },
+  "browserTests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "states": [
+    "empty",
+    "source-update review",
+    "accepted brief"
+  ],
+  "sourceUpdateCases": [
+    "preview discard leaves accepted state unchanged",
+    "batch accept",
+    "stable IDs and revisions",
+    "retained edits with historical pointers",
+    "separate requirement confirmation",
+    "Undo preserves later edits",
+    "late OCR discarded after clear"
+  ],
+  "physicalMacRunPerformed": false,
+  "realUserStudyPerformed": false
+}

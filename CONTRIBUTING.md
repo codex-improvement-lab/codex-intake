@@ -42,6 +42,8 @@ After a deliberate refresh, visually inspect both PNG files before accepting the
 ## Non-negotiable invariants
 
 - Every rule-derived finding, risk, gap, and done-when has a valid source ID and locator.
+- Source IDs survive updates; pointers identify exact revisions. A changed source never silently inherits a prior edit or confirmation as current evidence.
+- Batch preview/discard must not mutate accepted state. Undo restores sources using the current edit ledger so later manual edits survive.
 - Portable exports never contain raw source bodies.
 - Redaction tests use synthetic secrets and verify the raw values are absent.
 - URLs are not fetched without a new, explicit user action and threat review.

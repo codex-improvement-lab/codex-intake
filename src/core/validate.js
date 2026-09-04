@@ -1,17 +1,20 @@
 export function validateProvenance(brief) {
   const errors = [];
   const sourceIds = new Set(brief.sources.map((source) => source.id));
+  const revisions = new Set([...brief.sources, ...(brief.sourceHistory || [])].map(source => `${source.id}@${source.revision ?? 1}`));
+  if (sourceIds.size !== brief.sources.length) errors.push("Current source IDs must be unique.");
 
   const check = (item, collection) => {
     if (!item.pointer) {
       errors.push(`${collection}:${item.id} has no source pointer.`);
       return;
     }
-    if (item.pointer.sourceId !== "USER" && !sourceIds.has(item.pointer.sourceId)) {
-      errors.push(`${collection}:${item.id} points to unknown source ${item.pointer.sourceId}.`);
-    }
-    if (!item.pointer.locator) {
-      errors.push(`${collection}:${item.id} has no locator.`);
+    for (const pointer of [item.pointer, item.previousPointer].filter(Boolean)) {
+      const revision = pointer.sourceRevision ?? 1;
+      if (pointer.sourceId !== "USER" && (!Number.isSafeInteger(revision) || revision < 1 || !revisions.has(`${pointer.sourceId}@${revision}`))) {
+        errors.push(`${collection}:${item.id} points to unknown source revision ${pointer.sourceId}@${revision}.`);
+      }
+      if (!pointer.locator) errors.push(`${collection}:${item.id} has no locator.`);
     }
   };
 
@@ -34,4 +37,3 @@ export function assertValidProvenance(brief) {
   }
   return brief;
 }
-

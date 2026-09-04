@@ -18,6 +18,7 @@ const includedPaths = [
   "examples",
   "release/MACOS_VALIDATION_RESULT.template.md",
   "release/RELEASE_NOTES_v0.1.0.md",
+  "release/RELEASE_NOTES_v0.2.0-rc.1.md",
   "scripts",
   "skills",
   "src",
@@ -34,7 +35,8 @@ const includedPaths = [
   "playwright.config.js",
   "pnpm-lock.yaml",
   "pnpm-workspace.yaml",
-  "vite.config.js"
+  "vite.config.js",
+  "vitest.config.js"
 ];
 
 function assertSafePackageTarget() {

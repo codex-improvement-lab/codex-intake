@@ -145,6 +145,7 @@ function locatorFor(source, lineIndex) {
 function pointerFor(source, lineIndex, excerpt) {
   return {
     sourceId: source.id,
+    sourceRevision: source.revision,
     locator: locatorFor(source, lineIndex),
     excerpt: concise(excerpt)
   };
@@ -155,13 +156,14 @@ function prepareSource(input, index) {
     ? input.kind
     : "text";
   const content = normalizeText(input.content);
-  const id = `S${String(index + 1).padStart(2, "0")}`;
+  const id = input.id;
   const byteSize = Number.isFinite(input.byteSize)
     ? input.byteSize
     : new TextEncoder().encode(content).byteLength;
 
   return {
     id,
+    revision: input.revision ?? 1,
     name: String(input.name || `${kind}-${index + 1}`),
     kind,
     mimeType: String(input.mimeType || "text/plain"),
@@ -373,7 +375,7 @@ export function compileIntake(inputSources) {
     throw new Error("Add at least one source before compiling an intake.");
   }
 
-  const sources = inputSources.map(prepareSource);
+  const sources = assignSourceIds(inputSources).map(prepareSource);
   const findings = sources
     .flatMap(scanFindings)
     .sort((left, right) => {
@@ -399,10 +401,10 @@ export function compileIntake(inputSources) {
       : `Turn the supplied context into a verified outcome for “${title}”.`;
 
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "1.1",
     engine: {
       name: "codex-intake-rules",
-      version: "0.1.0",
+      version: "0.2.0",
       mode: "local-deterministic"
     },
     title: concise(title, 96),
@@ -415,4 +417,27 @@ export function compileIntake(inputSources) {
     doneWhen: deriveDoneWhen(findings, privacyRisks),
     gaps: deriveGaps(sources, findings)
   };
+}
+
+// IDs are stable within a desk. Explicit IDs survive replacement and removal;
+// callers that have no IDs (including the CLI) receive deterministic ordered IDs.
+export function assignSourceIds(inputs) {
+  const used = new Set();
+  let next = 1;
+  for (const input of inputs) {
+    if (input.id === undefined) continue;
+    if (typeof input.id !== "string" || !/^S\d{2,6}$/.test(input.id) || Number(input.id.slice(1)) < 1) {
+      throw new Error("Source IDs must be S followed by 2 to 6 digits, starting at S01.");
+    }
+    if (used.has(input.id)) throw new Error(`Duplicate source ID: ${input.id}`);
+    used.add(input.id);
+    next = Math.max(next, Number(input.id.slice(1)) + 1);
+  }
+  return inputs.map(input => {
+    const revision = input.revision ?? 1;
+    if (!Number.isSafeInteger(revision) || revision < 1) throw new Error("Source revision must be a positive safe integer.");
+    const id = input.id ?? `S${String(next++).padStart(2, "0")}`;
+    if (!/^S\d{2,6}$/.test(id)) throw new Error("Source ID range exhausted.");
+    return { ...input, id, revision };
+  });
 }

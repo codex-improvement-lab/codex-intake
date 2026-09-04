@@ -4,7 +4,7 @@ Codex Intake handles exactly the kind of material that people accidentally overs
 
 ## Threat model
 
-The v0.1 design assumes the local machine, browser profile, Node runtime, and installed package set are trusted. It aims to reduce these risks:
+The local design assumes the machine, browser profile, Node runtime, and installed package set are trusted. It aims to reduce these risks:
 
 - raw task material sent to a model or external service before review;
 - credentials or personal identifiers copied into a task brief;
@@ -20,6 +20,8 @@ It does not protect against malware on the machine, a compromised dependency, an
 - The endpoint enforces a 12 MB limit and does not store the image.
 - CLI paths are read only when passed explicitly; `--inventory` lists names and does not open bodies.
 - Exports include fingerprints, masked excerpts, and pointers, not raw source content.
+- Source-update previews and retained references apply the same redaction. Historical entries contain metadata, not raw bodies or File handles. Clearing the desk aborts and invalidates pending OCR.
+- Accepting a source batch or confirming a requirement does not attest to source authenticity, task correctness or safe execution of commands mentioned in input.
 
 ## Dependency posture
 

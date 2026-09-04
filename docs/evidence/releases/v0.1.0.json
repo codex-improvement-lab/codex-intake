@@ -1,0 +1,492 @@
+{
+  "version": "0.1.0",
+  "sourceCommit": "04278b649efbb84cf2ffbdd066e3241ae5800d80",
+  "releaseId": 383033250,
+  "releaseUrl": "https://github.com/codex-improvement-lab/codex-intake/releases/tag/v0.1.0",
+  "publishedAt": "2026-09-04T21:53:05Z",
+  "prerelease": true,
+  "ci": {
+    "id": 33922820507,
+    "sha": "04278b649efbb84cf2ffbdd066e3241ae5800d80",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/33922820507",
+    "jobs": [
+      {
+        "id": 101184716893,
+        "name": "portable-core (ubuntu-latest)",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/33922820507/job/101184716893",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-09-04T21:49:15Z",
+            "completed_at": "2026-09-04T21:49:17Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-09-04T21:49:17Z",
+            "completed_at": "2026-09-04T21:49:17Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-09-04T21:49:17Z",
+            "completed_at": "2026-09-04T21:49:19Z"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-09-04T21:49:19Z",
+            "completed_at": "2026-09-04T21:49:20Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-09-04T21:49:20Z",
+            "completed_at": "2026-09-04T21:49:23Z"
+          },
+          {
+            "name": "Run pnpm test",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-09-04T21:49:23Z",
+            "completed_at": "2026-09-04T21:49:25Z"
+          },
+          {
+            "name": "Run pnpm build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-09-04T21:49:25Z",
+            "completed_at": "2026-09-04T21:49:26Z"
+          },
+          {
+            "name": "Run pnpm check:project",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-09-04T21:49:26Z",
+            "completed_at": "2026-09-04T21:49:26Z"
+          },
+          {
+            "name": "Run pnpm check:macos-design",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-09-04T21:49:26Z",
+            "completed_at": "2026-09-04T21:49:27Z"
+          },
+          {
+            "name": "Run pnpm marketplace:check",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-09-04T21:49:27Z",
+            "completed_at": "2026-09-04T21:49:28Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-09-04T21:49:28Z",
+            "completed_at": "2026-09-04T21:49:30Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-09-04T21:49:30Z",
+            "completed_at": "2026-09-04T21:49:30Z"
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-09-04T21:49:30Z",
+            "completed_at": "2026-09-04T21:49:31Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-09-04T21:49:31Z",
+            "completed_at": "2026-09-04T21:49:31Z"
+          }
+        ]
+      },
+      {
+        "id": 101184717088,
+        "name": "portable-core (windows-latest)",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/33922820507/job/101184717088",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-09-04T21:49:16Z",
+            "completed_at": "2026-09-04T21:49:16Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-09-04T21:49:16Z",
+            "completed_at": "2026-09-04T21:49:23Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-09-04T21:49:23Z",
+            "completed_at": "2026-09-04T21:49:26Z"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-09-04T21:49:26Z",
+            "completed_at": "2026-09-04T21:49:32Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-09-04T21:49:32Z",
+            "completed_at": "2026-09-04T21:49:36Z"
+          },
+          {
+            "name": "Run pnpm test",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-09-04T21:49:36Z",
+            "completed_at": "2026-09-04T21:49:39Z"
+          },
+          {
+            "name": "Run pnpm build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-09-04T21:49:39Z",
+            "completed_at": "2026-09-04T21:49:41Z"
+          },
+          {
+            "name": "Run pnpm check:project",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-09-04T21:49:41Z",
+            "completed_at": "2026-09-04T21:49:43Z"
+          },
+          {
+            "name": "Run pnpm check:macos-design",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-09-04T21:49:43Z",
+            "completed_at": "2026-09-04T21:49:44Z"
+          },
+          {
+            "name": "Run pnpm marketplace:check",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-09-04T21:49:44Z",
+            "completed_at": "2026-09-04T21:49:46Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-09-04T21:49:46Z",
+            "completed_at": "2026-09-04T21:49:48Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-09-04T21:49:48Z",
+            "completed_at": "2026-09-04T21:49:48Z"
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-09-04T21:49:48Z",
+            "completed_at": "2026-09-04T21:49:50Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-09-04T21:49:50Z",
+            "completed_at": "2026-09-04T21:49:50Z"
+          }
+        ]
+      },
+      {
+        "id": 101184717126,
+        "name": "portable-core (macos-latest)",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/33922820507/job/101184717126",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-09-04T21:49:23Z",
+            "completed_at": "2026-09-04T21:49:24Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-09-04T21:49:24Z",
+            "completed_at": "2026-09-04T21:49:26Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-09-04T21:49:26Z",
+            "completed_at": "2026-09-04T21:49:27Z"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-09-04T21:49:27Z",
+            "completed_at": "2026-09-04T21:49:29Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-09-04T21:49:29Z",
+            "completed_at": "2026-09-04T21:49:32Z"
+          },
+          {
+            "name": "Run pnpm test",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-09-04T21:49:32Z",
+            "completed_at": "2026-09-04T21:49:34Z"
+          },
+          {
+            "name": "Run pnpm build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-09-04T21:49:34Z",
+            "completed_at": "2026-09-04T21:49:34Z"
+          },
+          {
+            "name": "Run pnpm check:project",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-09-04T21:49:34Z",
+            "completed_at": "2026-09-04T21:49:35Z"
+          },
+          {
+            "name": "Run pnpm check:macos-design",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-09-04T21:49:35Z",
+            "completed_at": "2026-09-04T21:49:36Z"
+          },
+          {
+            "name": "Run pnpm marketplace:check",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-09-04T21:49:36Z",
+            "completed_at": "2026-09-04T21:49:37Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-09-04T21:49:37Z",
+            "completed_at": "2026-09-04T21:49:40Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-09-04T21:49:40Z",
+            "completed_at": "2026-09-04T21:49:40Z"
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-09-04T21:49:40Z",
+            "completed_at": "2026-09-04T21:49:41Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-09-04T21:49:41Z",
+            "completed_at": "2026-09-04T21:49:41Z"
+          }
+        ]
+      },
+      {
+        "id": 101184717251,
+        "name": "browser-loop",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/33922820507/job/101184717251",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-09-04T21:49:16Z",
+            "completed_at": "2026-09-04T21:49:18Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-09-04T21:49:18Z",
+            "completed_at": "2026-09-04T21:49:20Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-09-04T21:49:20Z",
+            "completed_at": "2026-09-04T21:49:21Z"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-09-04T21:49:21Z",
+            "completed_at": "2026-09-04T21:49:24Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-09-04T21:49:24Z",
+            "completed_at": "2026-09-04T21:49:26Z"
+          },
+          {
+            "name": "Run pnpm exec playwright install --with-deps chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-09-04T21:49:26Z",
+            "completed_at": "2026-09-04T21:49:57Z"
+          },
+          {
+            "name": "Run pnpm test:e2e",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-09-04T21:49:57Z",
+            "completed_at": "2026-09-04T21:50:07Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-09-04T21:50:07Z",
+            "completed_at": "2026-09-04T21:50:07Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-09-04T21:50:07Z",
+            "completed_at": "2026-09-04T21:50:07Z"
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-09-04T21:50:07Z",
+            "completed_at": "2026-09-04T21:50:08Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-09-04T21:50:08Z",
+            "completed_at": "2026-09-04T21:50:08Z"
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [
+    {
+      "name": "codex-intake-0.1.0-source.zip",
+      "size": 540664,
+      "digest": "sha256:ec7501a1dae7493d79105d27179233a88577a1a29fc0b5aad4129021a8c87676",
+      "browser_download_url": "https://github.com/codex-improvement-lab/codex-intake/releases/download/v0.1.0/codex-intake-0.1.0-source.zip"
+    },
+    {
+      "name": "codex-intake-0.1.0-source.zip.sha256",
+      "size": 96,
+      "digest": "sha256:ab168d7bfb9471601c33b9d991a8dd985ad95abe076822e587644cb6063233e3",
+      "browser_download_url": "https://github.com/codex-improvement-lab/codex-intake/releases/download/v0.1.0/codex-intake-0.1.0-source.zip.sha256"
+    }
+  ],
+  "unauthenticatedDownloadVerified": true
+}

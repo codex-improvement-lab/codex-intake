@@ -11,6 +11,12 @@ function evidenceScreenshotPath(testInfo, filename) {
   return testInfo.outputPath(filename);
 }
 
+async function acceptUpdate(page) {
+  await expect(page.locator("#source-update-review")).toBeVisible();
+  await page.locator("#accept-source-update").click();
+  await expect(page.locator("#source-update-review")).toBeHidden();
+}
+
 test("the demo explains the product and preserves pointer navigation", async ({ page }, testInfo) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /Drop the mess/i })).toBeVisible();
@@ -76,6 +82,7 @@ test("a screenshot can be OCRed locally into source-linked evidence", async ({ p
   await page.locator("#file-input").setInputFiles(screenshot);
   await expect(page.locator("[data-source-card]")) .toHaveCount(1);
   await page.getByRole("button", { name: "Run local OCR" }).click();
+  await acceptUpdate(page);
 
   await expect(page.locator("[data-source-card] pre")).toContainText(/ERROR|locator/i, { timeout: 60_000 });
   await expect(page.locator(".ledger-list")).toContainText(/ERROR|locator/i);
@@ -103,11 +110,13 @@ test("the real-Mac handoff order preserves a user objective through upload, OCR,
 
   await page.locator("#brief-objective").fill(userObjective);
   await page.locator("#file-input").setInputFiles(screenshot);
+  await acceptUpdate(page);
   await expect(page.locator("[data-source-card]")).toHaveCount(4);
   await expect(page.locator("#brief-objective")).toHaveValue(userObjective);
 
   const screenshotCard = page.locator("[data-source-card='S04']");
   await screenshotCard.getByRole("button", { name: "Run local OCR" }).click();
+  await acceptUpdate(page);
   await expect(screenshotCard.locator("pre")).toContainText(/ERROR|objective/i, { timeout: 60_000 });
   await expect(page.locator(".pointer-chip").filter({ hasText: "S04:OCR:L" }).first()).toBeVisible();
   await expect(page.locator("#brief-objective")).toHaveValue(userObjective);
@@ -131,5 +140,5 @@ test("an unsupported binary is rejected without becoming a source", async ({ pag
   });
 
   await expect(page.locator("[data-source-card]")).toHaveCount(0);
-  await expect(page.locator("#toast")).toContainText("not extracted in v0.1");
+  await expect(page.locator("#toast")).toContainText("not extracted");
 });

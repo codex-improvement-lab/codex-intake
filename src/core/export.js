@@ -1,13 +1,14 @@
 import { redactText } from "./intake.js";
 
 export function pointerLabel(pointer) {
-  return pointer ? `${pointer.sourceId}:${pointer.locator}` : "NO-SOURCE";
+  return pointer ? `${pointer.sourceId}:${pointer.locator}${pointer.sourceId !== "USER" && pointer.sourceRevision ? ` · r${pointer.sourceRevision}` : ""}` : "NO-SOURCE";
 }
 
 function portablePointer(pointer) {
   return pointer
     ? {
         sourceId: pointer.sourceId,
+        ...(pointer.sourceId === "USER" ? {} : { sourceRevision: pointer.sourceRevision ?? 1 }),
         locator: pointer.locator,
         excerpt: redactText(pointer.excerpt)
       }
@@ -20,6 +21,7 @@ export function toPortableBrief(brief) {
     engine: { ...brief.engine },
     title: redactText(brief.title),
     objective: redactText(brief.objective),
+    fieldOwnership: { title: brief.fieldOwnership?.title || "rule-derived", objective: brief.fieldOwnership?.objective || "rule-derived" },
     situation: redactText(brief.situation),
     primaryPointer: portablePointer(brief.primaryPointer),
     doneWhen: brief.doneWhen
@@ -29,7 +31,10 @@ export function toPortableBrief(brief) {
         text: redactText(item.text),
         confidence: item.confidence,
         rule: item.rule,
-        pointer: portablePointer(item.pointer)
+        authorship: item.authorship || (item.rule === "user-authored" ? "user-authored" : "rule-derived"),
+        confirmation: item.reviewStatus === "needs-review" ? "needs-review" : item.confirmed ? "user-confirmed" : "candidate",
+        pointer: portablePointer(item.pointer),
+        ...(item.previousPointer ? { previousPointer: portablePointer(item.previousPointer) } : {})
       })),
     findings: brief.findings.map((item) => ({
       id: item.id,
@@ -37,6 +42,8 @@ export function toPortableBrief(brief) {
       text: redactText(item.text),
       confidence: item.confidence,
       rule: item.rule,
+      authorship: item.authorship || "rule-derived",
+      reviewStatus: item.reviewStatus || "current",
       pointer: portablePointer(item.pointer)
     })),
     privacyRisks: brief.privacyRisks.map((risk) => ({
@@ -55,6 +62,7 @@ export function toPortableBrief(brief) {
     })),
     sources: brief.sources.map((source) => ({
       id: source.id,
+      revision: source.revision ?? 1,
       name: redactText(source.name),
       kind: source.kind,
       mimeType: source.mimeType,
@@ -62,6 +70,11 @@ export function toPortableBrief(brief) {
       digest: source.digest,
       lineCount: source.lineCount,
       ocr: source.ocr ? { ...source.ocr } : null,
+      rawContentIncluded: false
+    })),
+    sourceHistory: (brief.sourceHistory || []).map(source => ({
+      id: source.id, revision: source.revision, name: redactText(source.name),
+      kind: source.kind, digest: source.digest, lineCount: source.lineCount,
       rawContentIncluded: false
     }))
   };
@@ -71,7 +84,7 @@ function mdPointer(pointer) {
   if (!pointer) return "`NO-SOURCE`";
   const label = pointerLabel(pointer);
   if (pointer.sourceId === "USER") return `\`${label}\``;
-  return `[\`${label}\`](#source-${pointer.sourceId.toLowerCase()})`;
+  return `[\`${label}\`](#source-${pointer.sourceId.toLowerCase()}-r${pointer.sourceRevision ?? 1})`;
 }
 
 function escapeCell(value) {
@@ -96,12 +109,13 @@ export function toMarkdown(brief) {
   ];
 
   for (const item of portable.doneWhen) {
-    lines.push(`- [ ] ${item.text} — ${mdPointer(item.pointer)}`);
+    const state = item.confirmation === "user-confirmed" ? "User-confirmed" : item.confirmation === "needs-review" ? "Source changed — review required" : "Candidate";
+    lines.push(`- [ ] **${state}** · ${item.text} — ${mdPointer(item.pointer)}${item.previousPointer ? ` · Previous reference: ${mdPointer(item.previousPointer)}` : ""}`);
   }
 
   lines.push("", "## Context ledger", "");
   for (const item of portable.findings) {
-    lines.push(`- **${item.category}** · ${item.text} — ${mdPointer(item.pointer)}`);
+    lines.push(`- **${item.category}** · ${item.text} — ${mdPointer(item.pointer)}${item.reviewStatus === "needs-review" ? " · **Source changed — retained user edit; review required**" : ""}`);
   }
 
   lines.push("", "## Privacy review", "");
@@ -131,8 +145,15 @@ export function toMarkdown(brief) {
   );
   for (const source of portable.sources) {
     lines.push(
-      `| <a id="source-${source.id.toLowerCase()}"></a>${source.id} | ${escapeCell(source.name)} | ${source.kind} | \`${source.digest}\` | ${source.lineCount} | no |`
+      `| <a id="source-${source.id.toLowerCase()}-r${source.revision}"></a>${source.id} r${source.revision} | ${escapeCell(source.name)} | ${source.kind} | \`${source.digest}\` | ${source.lineCount} | no |`
     );
+  }
+
+  if (portable.sourceHistory.length) {
+    lines.push("", "## Retained source references", "", "These older or removed revisions support traceability of retained edits; they are not current-source confirmation.", "");
+    for (const source of portable.sourceHistory) {
+      lines.push(`- <a id="source-${source.id.toLowerCase()}-r${source.revision}"></a>**${source.id} r${source.revision}** · ${escapeCell(source.name)} · fingerprint \`${source.digest}\` · raw content omitted`);
+    }
   }
 
   lines.push(
@@ -153,6 +174,7 @@ export function toCodexPrompt(brief) {
   return [
     "Use the following local intake as the task contract.",
     "Preserve source pointers when reporting claims. Treat open gaps as questions, not facts.",
+    "Rule candidates are not confirmed requirements. Review source-changed items and distinguish them from user-confirmed requirements.",
     "Do not reproduce or request redacted secrets. Verify each included done-when before declaring completion.",
     "",
     toMarkdown(brief)

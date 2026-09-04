@@ -8,17 +8,21 @@ Codex Intake prepares a task contract. It does not run the task, manage agents, 
 
 ### Deterministic core
 
-`src/core/intake.js` normalizes explicitly selected sources, assigns ordered IDs, computes stable FNV-1a fingerprints, extracts bounded candidates, scans privacy patterns, and derives initial done-when and gaps. It contains no Node-only API and runs unchanged in the browser and CLI.
+`src/core/intake.js` normalizes explicitly selected sources, preserves explicit stable desk IDs and revisions (or assigns deterministic IDs for fresh CLI input), computes FNV-1a fingerprints, extracts bounded candidates, scans privacy patterns, and derives initial done-when and gaps. It contains no Node-only API and runs in the browser and CLI. Fingerprints are comparison aids, not authenticity proofs.
 
 `src/core/export.js` builds portable JSON, Markdown, and a Codex prompt. The portable shape is rebuilt field by field; source `content`, browser `File`, and preview URL fields cannot enter the export by accidental object spread.
 
-`src/core/validate.js` is the fail-closed provenance gate. A brief is invalid when any finding, risk, gap, or done-when lacks a locator or points at an unknown source.
+`src/core/validate.js` checks locators and the exact source ID/revision pair against current sources or retained historical metadata. Duplicate current IDs and missing revisions fail validation.
 
 ### Browser dropzone
 
 `src/main.js` owns an in-memory source pile and editable brief. File bodies are read only after browser selection. The app deliberately avoids silent `localStorage` persistence; saving is an explicit export.
 
-`src/core/edit-ownership.js` separates compiler suggestions from user-owned fields. Title and objective are global fields; generated done-when edits are keyed by deterministic rule; finding edits are keyed by source fingerprint, locator, category, and rule; manually added criteria carry `USER:manual`. Direct input transfers only that field to user ownership. Adding or removing a source, or completing OCR, recompiles compiler-owned fields, reapplies still-applicable user fields, preserves manual criteria, and appends new compiler findings. Clearing the desk or loading a new demo resets the ownership ledger. If a source-derived item disappears, its edit is not promoted into an unsupported claim.
+`src/core/edit-ownership.js` keeps explicit edit records with their original candidate, source revision and source metadata. A still-supported item receives its user field values. A changed or removed source leaves an edited item visible with its old reference and `needs-review`; new compiler candidates remain separate. Confirmation is revision-bound. Keeping a stale requirement detaches it as `USER:manual` and retains `previousPointer`.
+
+`src/core/source-updates.js` builds a proposed brief and a before/after change list without mutating the accepted state. The UI accepts or discards the whole proposed source batch. One Undo snapshot restores the previous sources using current edit ownership, so edits made after acceptance survive. Changed content must get a new source revision; only the Undo path permits moving back to an earlier revision.
+
+The revision history stores only referenced source metadata. Raw inputs and selected File/blob handles stay in page memory. Unused preview URLs are revoked when no longer needed by current, pending or Undo inputs. Clearing the desk cancels in-flight OCR and invalidates its result. Clearing or loading a demo explicitly resets the desk.
 
 Screenshot OCR calls only `/api/ocr` on the same local origin. `vite.config.js` installs that bounded middleware in both development and preview mode.
 

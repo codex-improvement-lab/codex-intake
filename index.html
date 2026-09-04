@@ -54,9 +54,10 @@
               id="file-input"
               type="file"
               multiple
-              accept=".txt,.md,.log,.json,.yaml,.yml,.toml,.csv,.js,.ts,.tsx,.jsx,.py,.rs,.go,.java,.cs,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff"
+              accept=".txt,.md,.log,.files,.lst,.json,.yaml,.yml,.toml,.csv,.js,.ts,.tsx,.jsx,.py,.rs,.go,.java,.cs,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff"
               hidden
             />
+            <input id="replace-file-input" type="file" hidden />
             <div class="drop-glyph" aria-hidden="true"><span>+</span></div>
             <strong>Drop files here</strong>
             <span>text · logs · screenshots · file lists</span>
@@ -113,6 +114,12 @@
               <span class="risk-number" id="risk-count">0</span>
               <span><strong>privacy flags</strong><small id="risk-summary">desk is clear</small></span>
             </div>
+          </div>
+
+          <section id="source-update-review" class="source-update-review" aria-label="Review source updates" hidden></section>
+          <div id="source-update-undo" class="source-update-undo" hidden>
+            <span>Source update applied. Later manual edits are kept when you undo.</span>
+            <button id="undo-source-update" class="mini-button" type="button">Undo last source update</button>
           </div>
 
           <div class="trace-lens" id="trace-lens" hidden>

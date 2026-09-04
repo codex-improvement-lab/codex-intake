@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0-rc.1 — 2026-09-05
+
+- Preview additions, replacements, removals and OCR updates before applying a source batch; accept, discard, or undo the latest accepted update.
+- Preserve stable source IDs and revision pointers. Keep edited text with an explicit review marker when its original source changes or disappears.
+- Separate rule/edited candidates from user-confirmed requirements. A retained stale requirement becomes an explicit user decision, with its old reference preserved.
+- Keep manual edits made after acceptance when Undo restores earlier sources; discard late OCR results after the desk is cleared.
+- Export schema 1.1 with review states and historical source metadata; raw bodies remain omitted and detected values masked.
+- Keep review actions visible on desktop and narrow screens, with pending exports hidden; restrict unit-test discovery to the canonical tests directory.
+
 ## Publication preparation — 2026-09-05
 
 - Add public repository/download/security routes and retain the accepted historical macOS receipt separately from current package identity.

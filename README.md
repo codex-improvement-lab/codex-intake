@@ -8,7 +8,22 @@ Codex Intake is a local-first dropzone for the awkward minute before real work b
 
 > **Signature interaction — Provenance Lens.** Choose **Trace links** on any real source card—or select a pointer—to illuminate every linked brief signal and dim unrelated material. The lens follows stored pointers; it never invents provenance. See the [Proofing Press design direction](docs/design-system.md).
 
-> v0.1.0 release candidate · no API key · no telemetry · raw source bodies excluded from exports
+> v0.2.0-rc.1 preview · review source updates · keep manual edits · no API key · no telemetry
+
+## Sources changed. Keep the work you reviewed.
+
+Add several files, update a pasted source, replace a selected file, remove a source, or rerun local OCR. Intake previews the affected suggestions before changing your accepted brief.
+
+![Source update review with preserved edits and explicit review status](assets/source-update-review.png)
+
+1. Use **Update source**, **Replace file**, or add new material.
+2. Review the before/after list. The accepted brief stays unchanged until **Accept all source changes**; **Discard update** leaves it intact.
+3. Inspect any **Source changed · review** items. Edited text is kept with its previous source revision instead of silently attaching it to new evidence.
+4. **Undo last source update** restores the previous source set and keeps manual edits made afterward.
+
+**Rule candidate**, **Edited candidate**, and **User confirmed** are distinct. Accepting a source batch does not confirm its requirements. For a stale requirement, **Keep as my requirement** records an explicit user decision with its previous reference; it does not assert that the replacement source supports the old wording.
+
+Updates operate within the current page session. The CLI shares the compiler and export format; it is not a persistent draft editor. See [source-update semantics and examples](docs/SOURCE_UPDATES.md).
 
 ## The product loop
 
@@ -58,30 +73,31 @@ Run `node scripts/intake.mjs --help` for the complete option list.
 
 ## What is supported
 
-| Input | v0.1 behavior | Network behavior |
+| Input | Current behavior | Network behavior |
 | --- | --- | --- |
 | Text, Markdown, transcript text | Local line-based signal and privacy extraction | None |
 | Logs and stack traces | Problem, command, and path candidates | None |
 | File inventory | Deterministic entries; directory mode reads names, not bodies | None |
 | PNG/JPEG/WebP/BMP/TIFF screenshots | Local English + Simplified Chinese OCR, with OCR confidence recorded | None after install |
 | URL | Registers the URL and preserves it as evidence | Never fetched |
-| Audio, PDF, office files | Not extracted in v0.1; provide transcript or text export | None |
+| Audio, PDF, office files | Not extracted; provide transcript or text export | None |
 
 Screenshot OCR is evidence extraction, not visual reasoning. A screenshot without OCR stays explicitly marked “not searchable,” and low-quality OCR should be edited before handoff.
 
 ## The brief contract
 
-Each source receives an ordered ID and stable content fingerprint. Every extracted finding, privacy warning, open gap, and generated done-when has this pointer shape:
+Each source receives a stable desk ID, a revision and a deterministic content fingerprint. Removing S02 does not rename S03; replacing S02 retains that ID and advances its revision. Every extracted finding, privacy warning, open gap, and generated done-when has this pointer shape:
 
 ```json
 {
   "sourceId": "S02",
+  "sourceRevision": 2,
   "locator": "L4",
   "excerpt": "ERROR TypeError: locator is undefined"
 }
 ```
 
-The portable JSON and Markdown exports contain source metadata and masked excerpts, never the raw source body. User-authored criteria are distinguished with `USER:manual`. Once a user edits a title, objective, finding, or done-when field, that field remains user-owned through later source additions and OCR recompiles; untouched fields continue to refresh from the deterministic compiler.
+Portable JSON schema 1.1 and Markdown exports contain source metadata, revision pointers, review/confirmation states and masked excerpts, never raw source bodies. User-authored criteria use `USER:manual`. Edited fields remain user-owned. When their source changes or disappears, the text and previous reference are retained and clearly marked for review; untouched suggestions refresh from the compiler. Historical source metadata is included only when a preserved edit references it.
 
 The compiler is deterministic for identical ordered inputs: there is no timestamp, random ID, API call, or model sampling in the result.
 
@@ -157,7 +173,7 @@ The exact latest run is recorded in [TEST_EVIDENCE.md](docs/TEST_EVIDENCE.md). C
 
 ## Project status
 
-The user authorized GitHub publication under `codex-improvement-lab/codex-intake`. v0.1 is the first public preview; source-update review is developed separately. Source and downloadable packages are published through [GitHub Releases](https://github.com/codex-improvement-lab/codex-intake/releases). npm and plugin-directory submission are separate from this release.
+The [v0.1.0 baseline](https://github.com/codex-improvement-lab/codex-intake/releases/tag/v0.1.0) was released first. v0.2.0-rc.1 adds source-update review from a separate development branch. Source ZIPs and verification results are available through [GitHub Releases](https://github.com/codex-improvement-lab/codex-intake/releases). npm and plugin-directory submission are separate.
 
 ## Contributing
 

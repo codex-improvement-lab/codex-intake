@@ -1,7 +1,7 @@
 {
   "name": "codex-intake",
-  "version": "0.1.0+codex.20260904214313",
-  "description": "Turn messy local task inputs into editable, source-linked briefs before execution.",
+  "version": "0.2.0-rc.1+codex.20260904224524",
+  "description": "Review changes from selected task sources while preserving manual edits and source-linked briefs.",
   "author": {
     "name": "Codex Intake contributors"
   },
@@ -16,7 +16,7 @@
   "interface": {
     "displayName": "Codex Intake",
     "shortDescription": "Messy inputs in. Source-linked brief out.",
-    "longDescription": "Compile screenshots, logs, notes, URLs, and file inventories locally into an editable task brief with privacy warnings and testable done-when criteria.",
+    "longDescription": "Compile selected inputs locally, preview source updates, preserve manual edits, and export reviewable briefs with source versions and explicit requirement confirmation.",
     "developerName": "Codex Intake contributors",
     "category": "Productivity",
     "capabilities": [
@@ -25,7 +25,8 @@
     "defaultPrompt": "Turn these messy task inputs into a source-linked brief before starting work.",
     "brandColor": "#FF5C35",
     "screenshots": [
-      "./assets/codex-intake-overview.png"
+      "./assets/codex-intake-overview.png",
+      "./assets/source-update-review.png"
     ]
   }
 }

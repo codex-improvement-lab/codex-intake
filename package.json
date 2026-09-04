@@ -1,6 +1,6 @@
 {
   "name": "codex-intake",
-  "version": "0.1.0",
+  "version": "0.2.0-rc.1",
   "private": true,
   "description": "Local-first dropzone that turns messy task inputs into editable, source-linked briefs.",
   "type": "module",
@@ -21,8 +21,8 @@
     "marketplace:resolve-installed": "node scripts/resolve-installed-copy.mjs",
     "check:macos-design": "node scripts/check-macos-design.mjs",
     "verify:macos": "node scripts/verify-macos.mjs",
-    "test": "vitest run --exclude tests/e2e/** --exclude plugins/**",
-    "test:watch": "vitest --exclude tests/e2e/** --exclude plugins/**",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:mac-handoff": "playwright test --grep \"real-Mac handoff order\"",
     "check:project": "node scripts/check-project.mjs",

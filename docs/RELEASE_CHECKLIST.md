@@ -1,7 +1,12 @@
-# v0.1.0 release checklist
+# v0.2.0-rc.1 release checklist
 
 ## Product and engineering gate
 
+- [x] Source updates are staged before acceptance; discard does not mutate the accepted brief.
+- [x] Stable IDs, revision pointers, retained edits and historical references survive replacement/removal/OCR.
+- [x] Rule candidates and user-confirmed requirements remain distinct; stale source-bound confirmation is not promoted.
+- [x] Undo restores the previous source batch while keeping later manual edits.
+- [x] Pending review actions are visible on desktop and narrow layouts; exports are hidden during review.
 - [x] One-minute demo communicates the source-pile-to-brief loop.
 - [x] Text, logs, file inventories, registered URLs, and screenshots have explicit behavior.
 - [x] Every extracted conclusion and generated completion check has a source pointer.
@@ -44,9 +49,9 @@
 - [ ] Create GitHub repository and remote.
 - [ ] Push initial history and observe CI on all configured operating systems.
 - [ ] Enable private vulnerability reporting and branch protection as desired.
-- [ ] Create signed/annotated `v0.1.0` tag and GitHub release.
+- [ ] Create annotated `v0.2.0-rc.1` tag and GitHub prerelease after its exact source commit passes CI.
 - [ ] Submit the plugin only after its public repository and legal URLs exist.
 
 Do not mark CI, macOS, plugin directory, or real-user validation complete from local Windows evidence.
 
-Current gate: the historical Intake-only final v2 candidate has a bound macOS functional PASS; see [platform scope](PLATFORM_SUPPORT.md). The user authorized GitHub source and release publication on 2026-09-05. New source-update functionality is developed separately and needs its own checks. No previous failed candidate row is promoted to PASS.
+Current scope: v0.1.0 was published first; source-update review is the separate v0.2.0-rc.1 candidate. Its current checks are recorded independently. Historical Intake-only Mac acceptance remains bound to its original candidate; no failed row is promoted and no new physical-Mac execution is claimed.

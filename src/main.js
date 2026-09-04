@@ -1,7 +1,7 @@
 import "./styles.css";
-import { compileIntake, redactText } from "./core/intake.js";
+import { assignSourceIds, redactText } from "./core/intake.js";
 import {
-  applyUserOwnedEdits,
+  confirmCriterion,
   createEditOwnership,
   createManualCriterion,
   recordCriterionEdit,
@@ -9,14 +9,15 @@ import {
   recordScalarEdit
 } from "./core/edit-ownership.js";
 import { pointerLabel, toCodexPrompt, toJson, toMarkdown } from "./core/export.js";
-import { assertValidProvenance } from "./core/validate.js";
 import { DEMO_SOURCES } from "./demo.js";
+import { buildReviewedBrief, planSourceUpdate, replaceSourceInput } from "./core/source-updates.js";
 
 const elements = {
   sourceCount: document.querySelector("#source-count"),
   sourceList: document.querySelector("#source-list"),
   dropzone: document.querySelector("#dropzone"),
   fileInput: document.querySelector("#file-input"),
+  replaceFileInput: document.querySelector("#replace-file-input"),
   chooseFiles: document.querySelector("#choose-files-button"),
   demo: document.querySelector("#demo-button"),
   emptyDemo: document.querySelector("#empty-demo-button"),
@@ -52,6 +53,15 @@ let editOwnership = createEditOwnership();
 let composerMode = "text";
 let toastTimer;
 let traceSourceId = null;
+let pendingUpdate = null;
+let undoInputs = null;
+let nextSourceNumber = 1;
+let composerSourceId = null;
+let replacementSourceId = null;
+let sourceBusy = false;
+let deskEpoch = 0;
+let ocrAbort = null;
+const previewUrls = new Set();
 const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff"]);
 const TEXT_EXTENSIONS = new Set([
   "txt", "md", "log", "out", "trace", "json", "yaml", "yml", "toml", "csv", "xml", "html", "css",
@@ -98,8 +108,101 @@ function compile() {
     return;
   }
 
-  brief = applyUserOwnedEdits(assertValidProvenance(compileIntake(inputs)), editOwnership);
+  inputs = assignSourceIds(inputs);
+  nextSourceNumber = Math.max(nextSourceNumber, ...inputs.map(input => Number(input.id.slice(1)) + 1));
+  brief = buildReviewedBrief(inputs, editOwnership, brief);
   render();
+}
+
+function syncUpdateControls() {
+  const controls = [elements.chooseFiles, elements.fileInput, elements.replaceFileInput, elements.addNote, elements.addUrl,
+    elements.demo, elements.emptyDemo, ...elements.sourceList.querySelectorAll("[data-remove],[data-ocr],[data-edit-source],[data-replace-file]"),
+    elements.composer.querySelector("button[type=submit]")];
+  for (const control of controls) if (control) control.disabled = sourceBusy || Boolean(pendingUpdate);
+  elements.dropzone.setAttribute("aria-disabled", String(sourceBusy || Boolean(pendingUpdate)));
+  for (const control of elements.briefContent.querySelectorAll("input,textarea,button")) control.disabled = Boolean(pendingUpdate);
+  for (const control of [elements.downloadJson, elements.downloadMarkdown, elements.copy]) control.disabled = Boolean(pendingUpdate);
+  document.querySelector("#undo-source-update").disabled = sourceBusy || Boolean(pendingUpdate);
+}
+
+function mayChangeSources() {
+  if (pendingUpdate) { notify("Accept or discard the pending source update first."); return false; }
+  if (sourceBusy) { notify("Wait for the selected source to finish reading."); return false; }
+  return true;
+}
+
+function releaseUnusedPreviews() {
+  const used = new Set([...inputs, ...(pendingUpdate?.inputs || []), ...(undoInputs || [])].map(input => input.previewUrl).filter(Boolean));
+  for (const url of previewUrls) if (!used.has(url)) { URL.revokeObjectURL(url); previewUrls.delete(url); }
+}
+
+function stageSourceInputs(nextInputs, message) {
+  if (!inputs.length && !brief) {
+    inputs = nextInputs;
+    compile();
+    notify(message);
+    return;
+  }
+  pendingUpdate = planSourceUpdate({ inputs, brief, ownership: editOwnership, nextInputs });
+  clearTimeout(toastTimer);
+  elements.toast.classList.remove("toast-visible");
+  hideComposer();
+  render();
+  document.querySelector("#source-update-review").scrollIntoView({ behavior: "smooth", block: "start" });
+  document.querySelector("#accept-source-update").focus({ preventScroll: true });
+}
+
+function acceptSourceUpdate() {
+  if (!pendingUpdate) return;
+  undoInputs = inputs.map(input => ({ ...input }));
+  inputs = pendingUpdate.inputs;
+  brief = pendingUpdate.brief;
+  pendingUpdate = null;
+  render();
+  releaseUnusedPreviews();
+  notify("Source update accepted. Review retained edits marked as source-changed.");
+}
+
+function discardSourceUpdate() {
+  pendingUpdate = null;
+  render();
+  releaseUnusedPreviews();
+  notify("Source update discarded. Your accepted brief and edits are unchanged.");
+}
+
+function undoSourceUpdate() {
+  if (!undoInputs || pendingUpdate || sourceBusy) return;
+  const restored = planSourceUpdate({ inputs, brief, ownership: editOwnership, nextInputs: undoInputs, allowRollback: true });
+  inputs = restored.inputs;
+  brief = restored.brief;
+  undoInputs = null;
+  render();
+  releaseUnusedPreviews();
+  notify("Last source update undone. Your manual edits are kept.");
+}
+
+function renderSourceUpdate() {
+  document.body.classList.toggle("has-source-update", Boolean(pendingUpdate));
+  const panel = document.querySelector("#source-update-review");
+  panel.hidden = !pendingUpdate;
+  document.querySelector("#source-update-undo").hidden = !undoInputs || Boolean(pendingUpdate);
+  if (!pendingUpdate) { panel.innerHTML = ""; return; }
+  const plan = pendingUpdate;
+  const sources = plan.sourceChanges.map(change => `<li><strong>${change.id}</strong> ${escapeHtml(redactText(change.name))} <span>${change.kind} · ${change.fromRevision ? `r${change.fromRevision} → ` : ""}${change.toRevision ? `r${change.toRevision}` : "removed"}</span></li>`).join("");
+  const changes = plan.changes.map(change => `<li class="update-change ${change.needsReview ? "update-needs-review" : ""}">
+    <div><strong>${escapeHtml(change.collection)} · ${change.kind}</strong>${change.retainedEdit ? '<span class="ownership-badge">manual edit kept</span>' : ""}</div>
+    ${change.before ? `<p class="update-before"><b>Before</b> ${escapeHtml(redactText(change.before))}</p>` : ""}
+    ${change.after ? `<p class="update-after"><b>After</b> ${escapeHtml(redactText(change.after))}</p>` : ""}
+    ${change.needsReview ? '<small>Old source reference retained · review required</small>' : ""}</li>`).join("");
+  panel.innerHTML = `<div class="update-heading"><span class="eyebrow">SOURCE UPDATE</span><h3>Review what will change</h3></div>
+    <p class="update-summary">${plan.sourceChanges.length} source change${plan.sourceChanges.length === 1 ? "" : "s"} · ${plan.changes.length} brief changes · ${plan.preservedEdits} manual edit record${plan.preservedEdits === 1 ? "" : "s"} kept</p>
+    <ul class="update-sources">${sources}</ul>
+    ${plan.needsReview ? `<p class="update-warning">${plan.needsReview} retained edit${plan.needsReview === 1 ? " needs" : "s need"} source review.</p>` : ""}
+    <details open><summary>Before and after · ${plan.changes.length} changes</summary><ul class="update-changes">${changes || '<li>No rule suggestion text changed.</li>'}</ul></details>
+    <p class="update-note">Accepting this batch updates the sources. Rule candidates still need your separate confirmation.</p>
+    <div class="update-actions"><button id="accept-source-update" class="button button-primary" type="button">Accept all source changes</button><button id="discard-source-update" class="button button-secondary" type="button">Discard update</button></div>`;
+  panel.querySelector("#accept-source-update").addEventListener("click", acceptSourceUpdate);
+  panel.querySelector("#discard-source-update").addEventListener("click", discardSourceUpdate);
 }
 
 function renderSources() {
@@ -126,7 +229,7 @@ function renderSources() {
       return `<article class="source-card" id="source-${source.id.toLowerCase()}" data-source-card="${source.id}">
         <div class="source-card-head">
           <span class="source-index">${source.id}</span>
-          <div><strong>${escapeHtml(source.name)}</strong><small>${kindLabel(source.kind)} · ${bytes(source.byteSize)} · #${source.digest}</small></div>
+          <div><strong>${escapeHtml(source.name)}</strong><small>r${source.revision} · ${kindLabel(source.kind)} · ${bytes(source.byteSize)} · #${source.digest}</small></div>
           <button class="icon-button remove-source" data-remove="${source.id}" type="button" aria-label="Remove ${escapeHtml(source.name)}">×</button>
         </div>
         ${image}
@@ -135,23 +238,36 @@ function renderSources() {
           <span class="source-risk ${sourceRisks.length ? "has-risk" : ""}">${sourceRisks.length ? `${sourceRisks.length} privacy flag${sourceRisks.length === 1 ? "" : "s"}` : "no flags"}</span>
           <div class="source-card-actions">
             <button class="mini-button trace-source" data-trace="${source.id}" type="button" aria-label="Trace every brief signal linked to ${escapeHtml(source.name)}">Trace links <span aria-hidden="true">↗</span></button>
+            ${source.kind !== "screenshot" ? `<button class="mini-button" data-edit-source="${source.id}" type="button">Update source</button>` : ""}
+            <button class="mini-button" data-replace-file="${source.id}" type="button">Replace file</button>
             ${ocrButton}
           </div>
         </div>
       </article>`;
     })
     .join("");
+  if (brief.sourceHistory?.length) {
+    elements.sourceList.innerHTML += `<section class="source-history" aria-label="Retained source references"><h3>Retained references</h3><p>Older or removed source revisions used by your preserved edits.</p>${brief.sourceHistory.map(source => `<article data-history-source="${source.id}" data-history-revision="${source.revision}"><strong>${source.id} · r${source.revision}</strong><span>${escapeHtml(redactText(source.name))}</span><small>Previous fingerprint #${source.digest} · raw content omitted</small></article>`).join("")}</section>`;
+  }
 }
 
 function pointerButton(pointer) {
-  return `<button class="pointer-chip" data-pointer="${escapeHtml(pointer.sourceId)}" type="button" title="${escapeHtml(pointer.excerpt || "Open source")}">${escapeHtml(pointerLabel(pointer))}</button>`;
+  return `<button class="pointer-chip" data-pointer="${escapeHtml(pointer.sourceId)}" data-pointer-revision="${pointer.sourceRevision ?? ""}" type="button" title="${escapeHtml(redactText(pointer.excerpt || "Open source"))}">${escapeHtml(pointerLabel(pointer))}</button>`;
+}
+
+function reviewLabel(item) {
+  if (item.reviewStatus === "needs-review") return "Source changed · review";
+  if (item.confirmed) return "User confirmed";
+  if (item.authorship === "user-authored") return "User-authored candidate";
+  if (item.authorship === "user-edited") return "Edited candidate";
+  return "Rule candidate";
 }
 
 function renderBrief() {
   const hasBrief = Boolean(brief);
   elements.briefEmpty.hidden = hasBrief;
   elements.briefContent.hidden = !hasBrief;
-  elements.exportBar.hidden = !hasBrief;
+  elements.exportBar.hidden = !hasBrief || Boolean(pendingUpdate);
 
   if (!brief) {
     elements.briefContent.innerHTML = "";
@@ -168,23 +284,25 @@ function renderBrief() {
 
   const doneWhen = brief.doneWhen
     .map(
-      (item, index) => `<li class="criterion ${item.included === false ? "criterion-off" : ""}">
+      (item, index) => `<li class="criterion ${item.included === false ? "criterion-off" : ""} ${item.reviewStatus === "needs-review" ? "item-needs-review" : ""}">
         <label class="criterion-check">
-          <input type="checkbox" data-done-included="${index}" ${item.included === false ? "" : "checked"} />
+          <input type="checkbox" aria-label="Include criterion ${index + 1}" data-done-included="${index}" ${item.included === false ? "" : "checked"} />
           <span></span>
         </label>
         <textarea rows="2" data-done-text="${index}" aria-label="Done-when criterion ${index + 1}">${escapeHtml(item.text)}</textarea>
         ${pointerButton(item.pointer)}
+        <div class="criterion-meta"><span class="status-text ownership-badge">${reviewLabel(item)}</span><button class="mini-button" data-confirm-criterion="${index}" type="button">${item.reviewStatus === "needs-review" ? "Keep as my requirement" : item.confirmed ? "Mark as candidate" : "Confirm requirement"}</button>${item.previousPointer ? `<small>Previous ${pointerButton(item.previousPointer)}</small>` : ""}</div>
       </li>`
     )
     .join("");
 
   const findings = brief.findings
     .map(
-      (item, index) => `<li class="ledger-row">
+      (item, index) => `<li class="ledger-row ${item.reviewStatus === "needs-review" ? "item-needs-review" : ""}">
         <span class="finding-type type-${item.category}">${escapeHtml(item.category)}</span>
         <textarea rows="2" data-finding-text="${index}" aria-label="Context finding ${index + 1}">${escapeHtml(item.text)}</textarea>
         ${pointerButton(item.pointer)}
+        <div class="finding-meta"><span class="status-text ownership-badge">${reviewLabel(item)}</span></div>
       </li>`
     )
     .join("");
@@ -210,12 +328,12 @@ function renderBrief() {
   elements.briefContent.innerHTML = `<div class="brief-sheet">
     <div class="sheet-index"><span>BRIEF / ${brief.sources.map((source) => source.id).join("+")}</span><span>${escapeHtml(brief.engine.mode)}</span></div>
     <label class="title-field">
-      <span>TASK TITLE</span>
+      <span>TASK TITLE <small id="title-ownership" class="field-ownership">${brief.fieldOwnership?.title === "user-edited" ? "user edited" : "rule candidate"}</small></span>
       <textarea id="brief-title" rows="2">${escapeHtml(brief.title)}</textarea>
     </label>
     <div class="objective-grid">
       <label>
-        <span>OBJECTIVE</span>
+        <span>OBJECTIVE <small id="objective-ownership" class="field-ownership">${brief.fieldOwnership?.objective === "user-edited" ? "user edited" : "rule candidate"}</small></span>
         <textarea id="brief-objective" rows="4">${escapeHtml(brief.objective)}</textarea>
       </label>
       <div class="situation-card">
@@ -249,16 +367,22 @@ function renderBrief() {
   document.querySelector("#brief-title").addEventListener("input", (event) => {
     brief.title = event.target.value;
     recordScalarEdit(editOwnership, "title", event.target.value);
+    brief.fieldOwnership.title = "user-edited";
+    document.querySelector("#title-ownership").textContent = "user edited";
   });
   document.querySelector("#brief-objective").addEventListener("input", (event) => {
     brief.objective = event.target.value;
     recordScalarEdit(editOwnership, "objective", event.target.value);
+    brief.fieldOwnership.objective = "user-edited";
+    document.querySelector("#objective-ownership").textContent = "user edited";
   });
   document.querySelectorAll("[data-done-text]").forEach((control) => {
     control.addEventListener("input", (event) => {
       const item = brief.doneWhen[Number(event.target.dataset.doneText)];
+      recordCriterionEdit(editOwnership, item, "text", event.target.value, brief);
       item.text = event.target.value;
-      recordCriterionEdit(editOwnership, item, "text", event.target.value);
+      event.target.closest(".criterion").querySelector(".status-text").textContent = reviewLabel(item);
+      if (item.reviewStatus !== "needs-review") event.target.closest(".criterion").querySelector("[data-confirm-criterion]").textContent = "Confirm requirement";
     });
   });
   document.querySelectorAll("[data-done-included]").forEach((control) => {
@@ -266,6 +390,7 @@ function renderBrief() {
       const item = brief.doneWhen[Number(event.target.dataset.doneIncluded)];
       item.included = event.target.checked;
       recordCriterionEdit(editOwnership, item, "included", event.target.checked);
+      event.target.closest(".criterion").querySelector(".status-text").textContent = reviewLabel(item);
       event.target.closest(".criterion").classList.toggle("criterion-off", !event.target.checked);
     });
   });
@@ -274,6 +399,14 @@ function renderBrief() {
       const item = brief.findings[Number(event.target.dataset.findingText)];
       recordFindingEdit(editOwnership, brief, item, event.target.value);
       item.text = event.target.value;
+      event.target.closest(".ledger-row").querySelector(".status-text").textContent = reviewLabel(item);
+    });
+  });
+  document.querySelectorAll("[data-confirm-criterion]").forEach(control => {
+    control.addEventListener("click", () => {
+      confirmCriterion(editOwnership, brief, brief.doneWhen[Number(control.dataset.confirmCriterion)]);
+      brief = buildReviewedBrief(inputs, editOwnership, brief);
+      render();
     });
   });
   document.querySelector("#add-criterion-button").addEventListener("click", () => {
@@ -286,13 +419,16 @@ function renderBrief() {
 function render() {
   renderSources();
   renderBrief();
+  renderSourceUpdate();
   applyTrace();
+  syncUpdateControls();
 }
 
 function applyTrace() {
   const sourceExists = brief?.sources.some((source) => source.id === traceSourceId);
   if (!sourceExists) traceSourceId = null;
   const active = Boolean(traceSourceId);
+  const revision = brief?.sources.find(source => source.id === traceSourceId)?.revision;
   document.body.classList.toggle("trace-active", active);
   elements.traceLens.hidden = !active;
 
@@ -301,25 +437,34 @@ function applyTrace() {
   const signalGroups = [...document.querySelectorAll(".situation-card, .criterion, .ledger-row, .risk-row, .gap-list li")];
 
   pointers.forEach((pointer) => {
-    pointer.classList.toggle("pointer-traced", active && pointer.dataset.pointer === traceSourceId);
+    pointer.classList.toggle("pointer-traced", active && pointer.dataset.pointer === traceSourceId && Number(pointer.dataset.pointerRevision || 1) === revision);
   });
   sourceCards.forEach((card) => {
     card.classList.toggle("source-traced", active && card.dataset.sourceCard === traceSourceId);
     card.classList.toggle("trace-dim", active && card.dataset.sourceCard !== traceSourceId);
   });
   signalGroups.forEach((group) => {
-    const linked = Boolean(active && group.querySelector(`[data-pointer="${CSS.escape(traceSourceId)}"]`));
+    const linked = Boolean(active && group.querySelector(`[data-pointer="${CSS.escape(traceSourceId)}"][data-pointer-revision="${revision}"]`));
     group.classList.toggle("trace-linked", linked);
     group.classList.toggle("trace-dim", active && !linked);
   });
 
   if (active) {
-    const linkedCount = pointers.filter((pointer) => pointer.dataset.pointer === traceSourceId).length;
-    elements.traceSummary.textContent = `${traceSourceId} · ${linkedCount} linked brief signal${linkedCount === 1 ? "" : "s"}`;
+    const linkedCount = pointers.filter((pointer) => pointer.dataset.pointer === traceSourceId && Number(pointer.dataset.pointerRevision || 1) === revision).length;
+    elements.traceSummary.textContent = `${traceSourceId} r${revision} · ${linkedCount} linked brief signal${linkedCount === 1 ? "" : "s"}`;
   }
 }
 
-function activateTrace(sourceId, scrollToSource = true) {
+function activateTrace(sourceId, scrollToSource = true, sourceRevision = null) {
+  const current = brief?.sources.find(source => source.id === sourceId);
+  if (sourceRevision && current?.revision !== sourceRevision) {
+    clearTrace();
+    const reference = document.querySelector(`[data-history-source="${CSS.escape(sourceId)}"][data-history-revision="${sourceRevision}"]`);
+    reference?.scrollIntoView({ behavior: "smooth", block: "center" });
+    reference?.classList.add("source-pulse");
+    notify(`${sourceId} r${sourceRevision} is a retained reference from an older or removed source.`);
+    return;
+  }
   if (!brief || sourceId === "USER" || !brief.sources.some((source) => source.id === sourceId)) return;
   traceSourceId = sourceId;
   applyTrace();
@@ -336,16 +481,21 @@ function clearTrace() {
   applyTrace();
 }
 
-function showComposer(mode) {
+function showComposer(mode, sourceId = null) {
+  if (!mayChangeSources()) return;
   composerMode = mode;
+  composerSourceId = sourceId;
+  const source = inputs.find(input => input.id === sourceId);
   const urlMode = mode === "url";
   elements.composer.hidden = false;
-  elements.composerTitle.textContent = urlMode ? "Register URL" : "Paste input";
+  elements.composerTitle.textContent = source ? `Update ${source.id} · r${source.revision}` : urlMode ? "Register URL" : "Paste input";
   elements.composerKindWrap.hidden = urlMode;
-  elements.composerName.value = urlMode ? "reference-url" : "pasted-note.txt";
+  elements.composerKind.value = source?.kind || "text";
+  elements.composerName.value = source?.name || (urlMode ? "reference-url" : "pasted-note.txt");
   elements.composerContentLabel.textContent = urlMode ? "URL (registered, never fetched)" : "Content";
   elements.composerContent.placeholder = urlMode ? "https://example.com/issue/123" : "Paste the unorganized task material here…";
-  elements.composerContent.value = "";
+  elements.composerContent.value = source?.content || "";
+  elements.composer.querySelector("button[type=submit]").textContent = source ? "Review source replacement" : "Add to desk";
   elements.composerContent.focus();
 }
 
@@ -354,29 +504,32 @@ function hideComposer() {
 }
 
 function loadDemo() {
-  for (const source of inputs) {
-    if (source.previewUrl) URL.revokeObjectURL(source.previewUrl);
-  }
-  inputs = DEMO_SOURCES.map((source) => ({ ...source }));
-  brief = null;
-  traceSourceId = null;
-  editOwnership = createEditOwnership();
+  clearDesk(false);
+  inputs = assignSourceIds(DEMO_SOURCES.map((source) => ({ ...source })));
   compile();
   document.querySelector(".workspace").scrollIntoView({ behavior: "smooth", block: "start" });
   notify("Demo compiled locally: 3 sources, 1 task contract.");
 }
 
-function clearDesk() {
-  for (const source of inputs) {
-    if (source.previewUrl) URL.revokeObjectURL(source.previewUrl);
-  }
+function clearDesk(showNotice = true) {
+  deskEpoch += 1;
+  ocrAbort?.abort();
+  ocrAbort = null;
+  sourceBusy = false;
+  for (const url of previewUrls) URL.revokeObjectURL(url);
+  previewUrls.clear();
   inputs = [];
   brief = null;
+  pendingUpdate = null;
+  undoInputs = null;
+  nextSourceNumber = 1;
+  composerSourceId = null;
+  replacementSourceId = null;
   traceSourceId = null;
   editOwnership = createEditOwnership();
   hideComposer();
   render();
-  notify("Local desk cleared.");
+  if (showNotice) notify("Local desk cleared.");
 }
 
 function fileKind(file) {
@@ -388,44 +541,39 @@ function fileKind(file) {
   return null;
 }
 
-async function addFiles(fileList) {
+async function addFiles(fileList, replaceId = null) {
+  if (!mayChangeSources()) return;
   const selected = [...fileList];
-  let added = 0;
-  for (const file of selected) {
-    if (file.size > 12 * 1024 * 1024) {
-      notify(`${file.name} is larger than the 12 MB local limit.`);
-      continue;
+  if (!selected.length) return;
+  if (replaceId && selected.length !== 1) { notify("Choose one file to replace this source."); return; }
+  const epoch = deskEpoch;
+  sourceBusy = true;
+  syncUpdateControls();
+  const added = [];
+  try {
+    for (const file of selected) {
+      if (epoch !== deskEpoch) return;
+      if (file.size > 12 * 1024 * 1024) { notify(`${redactText(file.name)} is larger than the 12 MB local limit.`); continue; }
+      const kind = fileKind(file);
+      if (!kind) { notify(`${redactText(file.name)} is not extracted. Use a text export or transcript.`); continue; }
+      const input = { name: file.name, kind, mimeType: file.type || "text/plain", byteSize: file.size, content: "", file };
+      if (kind === "screenshot") {
+        input.previewUrl = URL.createObjectURL(file);
+        previewUrls.add(input.previewUrl);
+      } else input.content = await file.text();
+      if (epoch !== deskEpoch) return;
+      if (!replaceId) { input.id = `S${String(nextSourceNumber++).padStart(2, "0")}`; input.revision = 1; }
+      added.push(input);
     }
-    const kind = fileKind(file);
-    if (!kind) {
-      notify(`${file.name} is not extracted in v0.1. Use a text export or transcript.`);
-      continue;
+    sourceBusy = false;
+    if (added.length) {
+      const next = replaceId ? replaceSourceInput(inputs, replaceId, added[0]) : [...inputs, ...added];
+      stageSourceInputs(next, `${added.length} selected source${added.length === 1 ? "" : "s"} added.`);
     }
-    if (kind === "screenshot") {
-      inputs.push({
-        name: file.name,
-        kind,
-        mimeType: file.type,
-        byteSize: file.size,
-        content: "",
-        previewUrl: URL.createObjectURL(file),
-        file
-      });
-    } else {
-      inputs.push({
-        name: file.name,
-        kind,
-        mimeType: file.type || "text/plain",
-        byteSize: file.size,
-        content: await file.text(),
-        file
-      });
-    }
-    added += 1;
-  }
-  if (added) {
-    compile();
-    notify(`${added} selected source${added === 1 ? "" : "s"} added.`);
+  } catch (error) {
+    if (epoch === deskEpoch) notify(error instanceof Error ? error.message : "Could not read the selected source.");
+  } finally {
+    if (epoch === deskEpoch) { sourceBusy = false; syncUpdateControls(); releaseUnusedPreviews(); }
   }
 }
 
@@ -439,31 +587,36 @@ function fileAsBase64(file) {
 }
 
 async function runOcr(sourceId, button) {
-  const source = brief.sources.find((item) => item.id === sourceId);
-  const input = inputs[brief.sources.indexOf(source)];
+  if (!mayChangeSources()) return;
+  const input = inputs.find(item => item.id === sourceId);
   if (!input?.file) {
     notify("This demo image has no local file handle. Add the screenshot again.");
     return;
   }
 
-  button.disabled = true;
+  const epoch = deskEpoch;
+  const revision = input.revision;
+  const controller = new AbortController();
+  ocrAbort = controller;
+  sourceBusy = true;
+  syncUpdateControls();
   button.textContent = "OCR running…";
   try {
     const response = await fetch("/api/ocr", {
       method: "POST",
+      signal: controller.signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ dataBase64: await fileAsBase64(input.file) })
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Local OCR failed.");
-    input.content = result.text;
-    input.ocr = result;
-    compile();
-    notify(`Local OCR complete · ${result.confidence ?? "—"}% confidence.`);
+    if (epoch !== deskEpoch || inputs.find(item => item.id === sourceId)?.revision !== revision) return;
+    sourceBusy = false;
+    stageSourceInputs(replaceSourceInput(inputs, sourceId, { ...input, content: result.text, ocr: result }), "Local OCR ready.");
   } catch (error) {
-    button.disabled = false;
-    button.textContent = "Run local OCR";
-    notify(error instanceof Error ? error.message : "Local OCR failed.");
+    if (epoch === deskEpoch && !controller.signal.aborted) notify(error instanceof Error ? error.message : "Local OCR failed.");
+  } finally {
+    if (epoch === deskEpoch) { sourceBusy = false; ocrAbort = null; if (pendingUpdate) syncUpdateControls(); else render(); }
   }
 }
 
@@ -499,16 +652,18 @@ elements.addUrl.addEventListener("click", () => showComposer("url"));
 elements.closeComposer.addEventListener("click", hideComposer);
 elements.chooseFiles.addEventListener("click", (event) => {
   event.stopPropagation();
+  if (!mayChangeSources()) return;
   elements.fileInput.click();
 });
 elements.dropzone.addEventListener("click", (event) => {
-  if (event.target.closest("button")) return;
+  if (event.target.closest("button,input") || !mayChangeSources()) return;
   elements.fileInput.click();
 });
 elements.dropzone.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" || event.key === " ") elements.fileInput.click();
+  if ((event.key === "Enter" || event.key === " ") && mayChangeSources()) { event.preventDefault(); elements.fileInput.click(); }
 });
-elements.fileInput.addEventListener("change", (event) => addFiles(event.target.files));
+elements.fileInput.addEventListener("change", (event) => { void addFiles(event.target.files); event.target.value = ""; });
+elements.replaceFileInput.addEventListener("change", (event) => { void addFiles(event.target.files, replacementSourceId); event.target.value = ""; });
 elements.dropzone.addEventListener("dragover", (event) => {
   event.preventDefault();
   elements.dropzone.classList.add("dropzone-active");
@@ -521,29 +676,49 @@ elements.dropzone.addEventListener("drop", (event) => {
 });
 elements.composer.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (!mayChangeSources()) return;
   const content = elements.composerContent.value.trim();
   if (!content) {
     notify("Add some source content first.");
     return;
   }
-  inputs.push({
+  const source = inputs.find(input => input.id === composerSourceId);
+  if (composerSourceId && !source) { notify("The source being edited is no longer on the desk."); return; }
+  const next = {
     name: elements.composerName.value.trim() || (composerMode === "url" ? "reference-url" : "pasted-note.txt"),
     kind: composerMode === "url" ? "url" : elements.composerKind.value,
-    content
-  });
+    content,
+    mimeType: "text/plain",
+    byteSize: new TextEncoder().encode(content).byteLength
+  };
+  let nextInputs;
+  if (source) nextInputs = replaceSourceInput(inputs, source.id, next);
+  else {
+    next.id = `S${String(nextSourceNumber++).padStart(2, "0")}`;
+    next.revision = 1;
+    nextInputs = [...inputs, next];
+  }
   hideComposer();
-  compile();
-  notify(composerMode === "url" ? "URL registered without fetching." : "Pasted source added.");
+  stageSourceInputs(nextInputs, composerMode === "url" ? "URL registered without fetching." : "Pasted source added.");
 });
 elements.sourceList.addEventListener("click", (event) => {
   const remove = event.target.closest("[data-remove]");
   if (remove) {
-    const source = brief.sources.find((item) => item.id === remove.dataset.remove);
-    const index = brief.sources.indexOf(source);
-    if (inputs[index]?.previewUrl) URL.revokeObjectURL(inputs[index].previewUrl);
-    inputs.splice(index, 1);
-    compile();
-    notify("Source removed; the brief was regenerated.");
+    if (!mayChangeSources()) return;
+    stageSourceInputs(inputs.filter(input => input.id !== remove.dataset.remove), "Source removed.");
+    return;
+  }
+  const edit = event.target.closest("[data-edit-source]");
+  if (edit) {
+    const source = inputs.find(input => input.id === edit.dataset.editSource);
+    if (source) showComposer(source.kind === "url" ? "url" : "text", source.id);
+    return;
+  }
+  const replace = event.target.closest("[data-replace-file]");
+  if (replace) {
+    if (!mayChangeSources()) return;
+    replacementSourceId = replace.dataset.replaceFile;
+    elements.replaceFileInput.click();
     return;
   }
   const ocr = event.target.closest("[data-ocr]");
@@ -562,8 +737,9 @@ elements.sourceList.addEventListener("click", (event) => {
 document.addEventListener("click", (event) => {
   const pointer = event.target.closest("[data-pointer]");
   if (!pointer || pointer.dataset.pointer === "USER") return;
-  activateTrace(pointer.dataset.pointer);
+  activateTrace(pointer.dataset.pointer, true, pointer.dataset.pointerRevision ? Number(pointer.dataset.pointerRevision) : null);
 });
+document.querySelector("#undo-source-update").addEventListener("click", undoSourceUpdate);
 elements.traceClear.addEventListener("click", clearTrace);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && traceSourceId) clearTrace();
