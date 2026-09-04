@@ -5,7 +5,7 @@
   "plugin": "codex-intake",
   "version": "0.1.0+codex.20260904214313",
   "contentHashAlgorithm": "sha256-path-and-file-digests-v1",
-  "contentSha256": "c06dab83351f87053ff33d78a8649455fd27121810c4fd9a0997b35ca8fb6430",
+  "contentSha256": "5d55fc151f86ad8774a46cb63a9e77f56e85e4cef0702424d23bf81b45f73338",
   "packagedFileCount": 58,
   "evidenceTransfer": "none; full real-Mac gate required"
 }
