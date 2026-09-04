@@ -6,8 +6,8 @@
   "images": {
     "assets/codex-intake-overview.png": "371e1df38e53587c8e3f68b22f30888fe2fef331a7ca366ec4286420a60d898c",
     "assets/codex-intake-full.png": "5577453fe5716838594a4959c05ec5ac2af9dd6bef054a25da74c2ca01335021",
-    "assets/source-update-review.png": "9e2105ef18fc137b91a0946bb6894a1a3bb7e53e5d7db214cd80807d4e003286",
-    "assets/source-update-review-mobile.png": "821d1409778e68276d0c42dc2550cbde7972aca43de36332d479e800d056b998"
+    "assets/source-update-review.png": "f5177059450c467c27e1d51814a0eed2b03a8eb7f5627ba500e8c557960e9a6f",
+    "assets/source-update-review-mobile.png": "0cfbb08b8b90db042ccb015bec40809fb40084df69859d6e65b38732795d17e1"
   },
   "coreTests": {
     "passed": 26,
@@ -42,5 +42,11 @@
     "late OCR discarded after clear"
   ],
   "physicalMacRunPerformed": false,
-  "realUserStudyPerformed": false
+  "realUserStudyPerformed": false,
+  "narrowScrollRegression": {
+    "initialHostedRun": 33926921395,
+    "initialResult": "FAIL: heading entered sticky header at 390px",
+    "fix": "Immediate review scrolling, actual header offset, disabled scroll anchoring; geometry must settle below header",
+    "localRepeatedViewportChecks": "6/6 pass after fix"
+  }
 }

@@ -137,9 +137,11 @@ for (const width of [1440, 390]) {
     await expect(page.locator("#export-bar")).toBeHidden();
     await expect(page.locator("#toast")).not.toHaveClass(/toast-visible/);
     await page.locator("#source-update-review").evaluate(element => element.scrollIntoView({ block: "start", behavior: "instant" }));
-    const heading = await page.locator(".update-heading").boundingBox();
-    const header = await page.locator(".topbar").boundingBox();
-    expect(heading.y).toBeGreaterThanOrEqual(header.y + header.height);
+    await expect.poll(async () => {
+      const heading = await page.locator(".update-heading").boundingBox();
+      const header = await page.locator(".topbar").boundingBox();
+      return heading.y - (header.y + header.height);
+    }).toBeGreaterThanOrEqual(0);
     await expect(page.locator("#accept-source-update")).toBeInViewport();
     await expect(page.locator("#discard-source-update")).toBeInViewport();
     expect(await page.locator("#accept-source-update").evaluate(button => {

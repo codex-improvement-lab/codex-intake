@@ -148,7 +148,9 @@ function stageSourceInputs(nextInputs, message) {
   elements.toast.classList.remove("toast-visible");
   hideComposer();
   render();
-  document.querySelector("#source-update-review").scrollIntoView({ behavior: "smooth", block: "start" });
+  const review = document.querySelector("#source-update-review");
+  review.style.scrollMarginTop = `${document.querySelector(".topbar").getBoundingClientRect().height + 14}px`;
+  review.scrollIntoView({ behavior: "auto", block: "start" });
   document.querySelector("#accept-source-update").focus({ preventScroll: true });
 }
 
@@ -182,6 +184,7 @@ function undoSourceUpdate() {
 }
 
 function renderSourceUpdate() {
+  document.documentElement.classList.toggle("has-source-update", Boolean(pendingUpdate));
   document.body.classList.toggle("has-source-update", Boolean(pendingUpdate));
   const panel = document.querySelector("#source-update-review");
   panel.hidden = !pendingUpdate;

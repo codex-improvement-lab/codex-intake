@@ -8,6 +8,7 @@
 - Keep manual edits made after acceptance when Undo restores earlier sources; discard late OCR results after the desk is cleared.
 - Export schema 1.1 with review states and historical source metadata; raw bodies remain omitted and detected values masked.
 - Keep review actions visible on desktop and narrow screens, with pending exports hidden; restrict unit-test discovery to the canonical tests directory.
+- Use immediate source-review navigation and disable scroll anchoring while reviewing, preventing the narrow-screen heading from sliding under the sticky header during source replacement.
 
 ## Publication preparation — 2026-09-05
 

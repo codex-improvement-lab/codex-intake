@@ -1374,6 +1374,8 @@ body.trace-active .source-card.trace-dim { filter: grayscale(.65); }
 .update-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .update-actions .button { flex: 0 1 auto; white-space: normal; min-width: 0; overflow-wrap: anywhere; }
 .has-source-update .toast { display: none; }
+body.has-source-update { overflow-anchor: none; }
+html.has-source-update { scroll-behavior: auto; overflow-anchor: none; }
 .source-update-undo { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; padding: 14px; margin: 0 0 18px; background: var(--acid); border: 1px solid var(--ink); font-size: 12px; line-height: 1.5; }
 .criterion-meta, .finding-meta { grid-column: 2 / -1; display: flex; gap: 9px; align-items: center; flex-wrap: wrap; min-width: 0; }
 .criterion-meta > small { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
