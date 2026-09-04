@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-replacement-candidate",
+  "candidateId": "codex-intake@0.1.0+codex.20260826170524",
+  "plugin": "codex-intake",
+  "version": "0.1.0+codex.20260826170524",
+  "contentHashAlgorithm": "sha256-path-and-file-digests-v1",
+  "contentSha256": "74883da55dae3e581fdb22e4cb1db7a58894c38a0041fe4aed69b99e2974454e",
+  "packagedFileCount": 54,
+  "evidenceTransfer": "none; full real-Mac gate required"
+}

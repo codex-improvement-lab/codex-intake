@@ -1,0 +1,49 @@
+{
+  "name": "codex-intake",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first dropzone that turns messy task inputs into editable, source-linked briefs.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "intake": "node scripts/intake.mjs",
+    "prepare:ocr": "node scripts/prepare-ocr.mjs",
+    "postinstall": "node scripts/prepare-ocr.mjs",
+    "marketplace:prepare": "node scripts/prepare-marketplace.mjs",
+    "marketplace:check": "pnpm marketplace:prepare && node scripts/check-marketplace.mjs",
+    "marketplace:resolve-installed": "node scripts/resolve-installed-copy.mjs",
+    "check:macos-design": "node scripts/check-macos-design.mjs",
+    "verify:macos": "node scripts/verify-macos.mjs",
+    "test": "vitest run --exclude tests/e2e/** --exclude plugins/**",
+    "test:watch": "vitest --exclude tests/e2e/** --exclude plugins/**",
+    "test:e2e": "playwright test",
+    "test:e2e:mac-handoff": "playwright test --grep \"real-Mac handoff order\"",
+    "check:project": "node scripts/check-project.mjs",
+    "release:check": "pnpm check:project && pnpm check:macos-design && pnpm test && pnpm build && pnpm test:e2e && pnpm marketplace:check"
+  },
+  "dependencies": {
+    "@tesseract.js-data/chi_sim": "^1.0.0",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "tesseract.js": "^6.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codex-improvement-lab/codex-intake.git"
+  },
+  "homepage": "https://github.com/codex-improvement-lab/codex-intake#readme",
+  "bugs": {
+    "url": "https://github.com/codex-improvement-lab/codex-intake/issues"
+  }
+}

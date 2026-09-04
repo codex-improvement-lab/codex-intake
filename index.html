@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Codex Intake turns messy local task inputs into editable, source-linked briefs."
+    />
+    <meta name="theme-color" content="#f4f0e6" />
+    <title>Codex Intake — evidence before execution</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Codex Intake home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>
+          <strong>CODEX INTAKE</strong>
+          <small>EVIDENCE BEFORE EXECUTION</small>
+        </span>
+      </a>
+      <div class="topbar-meta">
+        <span class="local-pill"><span class="pulse-dot"></span> LOCAL / NO API KEY</span>
+        <button class="button button-quiet" id="clear-button" type="button">Clear desk</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-kicker"><span>01</span> BEFORE YOU ASK CODEX TO WORK</div>
+        <h1>Drop the mess.<br /><em>Keep the evidence.</em></h1>
+        <p>
+          Screenshots, stack traces, half-written notes, and file lists become one editable task
+          brief—with privacy warnings and a source pointer behind every claim.
+        </p>
+        <div class="hero-actions">
+          <button class="button button-primary" id="demo-button" type="button">Load the 20-second demo</button>
+          <span>Nothing leaves this machine.</span>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Codex Intake workspace">
+        <aside class="intake-rail">
+          <div class="rail-heading">
+            <div>
+              <span class="eyebrow">INPUT DESK</span>
+              <h2>Source pile</h2>
+            </div>
+            <span class="count-badge" id="source-count">0</span>
+          </div>
+
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop files">
+            <input
+              id="file-input"
+              type="file"
+              multiple
+              accept=".txt,.md,.log,.json,.yaml,.yml,.toml,.csv,.js,.ts,.tsx,.jsx,.py,.rs,.go,.java,.cs,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff"
+              hidden
+            />
+            <div class="drop-glyph" aria-hidden="true"><span>+</span></div>
+            <strong>Drop files here</strong>
+            <span>text · logs · screenshots · file lists</span>
+            <button class="text-button" id="choose-files-button" type="button">or choose files</button>
+          </div>
+
+          <div class="input-actions">
+            <button class="button button-secondary" id="add-note-button" type="button">+ Paste input</button>
+            <button class="button button-secondary" id="add-url-button" type="button">+ Register URL</button>
+          </div>
+
+          <form class="composer" id="composer" hidden>
+            <div class="composer-head">
+              <strong id="composer-title">Paste input</strong>
+              <button class="icon-button" id="close-composer-button" type="button" aria-label="Close">×</button>
+            </div>
+            <label>
+              Source label
+              <input id="composer-name" autocomplete="off" value="pasted-note.txt" />
+            </label>
+            <label id="composer-kind-wrap">
+              Input kind
+              <select id="composer-kind">
+                <option value="text">Note / transcript</option>
+                <option value="log">Error log</option>
+                <option value="file-list">File inventory</option>
+              </select>
+            </label>
+            <label>
+              <span id="composer-content-label">Content</span>
+              <textarea id="composer-content" rows="8" placeholder="Paste the unorganized task material here…"></textarea>
+            </label>
+            <div class="composer-actions">
+              <button class="button button-primary button-small" type="submit">Add to desk</button>
+              <span>Parsed in this browser session.</span>
+            </div>
+          </form>
+
+          <div class="source-list" id="source-list"></div>
+
+          <div class="privacy-footnote">
+            <span class="lock-glyph" aria-hidden="true">⌁</span>
+            <p><strong>Private by posture.</strong> No telemetry, no model call, no silent draft persistence.</p>
+          </div>
+        </aside>
+
+        <section class="brief-panel" aria-live="polite">
+          <div class="brief-toolbar">
+            <div>
+              <span class="eyebrow">TASK CONTRACT</span>
+              <h2>Brief canvas</h2>
+            </div>
+            <div class="risk-meter" id="risk-meter" data-level="clear">
+              <span class="risk-number" id="risk-count">0</span>
+              <span><strong>privacy flags</strong><small id="risk-summary">desk is clear</small></span>
+            </div>
+          </div>
+
+          <div class="trace-lens" id="trace-lens" hidden>
+            <span class="trace-lens-pulse" aria-hidden="true"></span>
+            <div><small>PROVENANCE LENS</small><strong id="trace-summary">S01 · 0 linked signals</strong></div>
+            <button class="button button-ink button-small" id="trace-clear-button" type="button">Clear trace</button>
+          </div>
+
+          <div class="brief-empty" id="brief-empty">
+            <div class="empty-map" aria-hidden="true">
+              <span class="node node-a">S01</span><span class="thread thread-a"></span>
+              <span class="node node-b">S02</span><span class="thread thread-b"></span>
+              <span class="node node-c">✓</span>
+            </div>
+            <span class="empty-index">00 / WAITING FOR EVIDENCE</span>
+            <h3>Your first useful brief is one drop away.</h3>
+            <p>Try the demo to see a note, a failing log, and a file list become one traceable task contract.</p>
+            <button class="button button-ink" id="empty-demo-button" type="button">Show me</button>
+          </div>
+
+          <div class="brief-content" id="brief-content" hidden></div>
+
+          <div class="export-bar" id="export-bar" hidden>
+            <div>
+              <span class="export-status"><i></i> READY TO HAND OFF</span>
+              <small>Exports are redacted and omit raw source bodies.</small>
+            </div>
+            <div class="export-actions">
+              <button class="button button-quiet" id="download-json-button" type="button">JSON</button>
+              <button class="button button-quiet" id="download-md-button" type="button">Markdown</button>
+              <button class="button button-primary" id="copy-button" type="button">Copy for Codex</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="how-strip" aria-label="Product flow">
+        <article><span>01</span><strong>Drop</strong><p>Only the files and text you explicitly choose.</p></article>
+        <article><span>02</span><strong>Trace</strong><p>Every rule-derived signal keeps an exact pointer.</p></article>
+        <article><span>03</span><strong>Edit</strong><p>The brief is a draft, never an oracle.</p></article>
+        <article><span>04</span><strong>Hand off</strong><p>Markdown, JSON, or a ready-to-paste Codex prompt.</p></article>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

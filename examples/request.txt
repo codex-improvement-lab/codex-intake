@@ -1,0 +1,3 @@
+Checkout export should preserve source links on Windows and macOS.
+Expected: Markdown includes testable done-when without exposing credentials.
+

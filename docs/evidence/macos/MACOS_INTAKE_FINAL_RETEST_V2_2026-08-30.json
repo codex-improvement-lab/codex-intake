@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "external macOS exact-candidate functional acceptance report",
+  "reportSha256": "27a008e94bd2a2dd1659c53ea4d555348baa47c78f532af81671113f913986e6",
+  "archive": "Codex-Improvement-Lab-macOS-Intake-final-retest-v2-2026-08-30.zip",
+  "archiveSha256": "198a45ee111bee7804f191653c6ec3dd0f3b31f11877d61d9115f147a0a139bb",
+  "candidateId": "codex-intake@0.1.0+codex.20260826170524",
+  "candidateContentSha256": "74883da55dae3e581fdb22e4cb1db7a58894c38a0041fe4aed69b99e2974454e",
+  "sourceSnapshotSha256": "d95026b00a87d795aeb298673203b3b687518bb9e88af5f5223487896308dc49",
+  "wholeSnapshotSha256": "a48b804e5f35d0cf8894291fe58a356ac2fa0f294ad6c73ab35ae4b5da4a6476",
+  "result": {
+    "macosFunctionalAcceptance": "PASS",
+    "releaseCheckExitCode": 0,
+    "vitest": "15/15 pass",
+    "playwright": "5/5 pass",
+    "manifest": "65/65 pass before and after gate",
+    "candidateHashStable": true
+  },
+  "environmentMetadata": {
+    "hardware": "not recorded in returned report",
+    "architecture": "not recorded in returned report",
+    "macosVersion": "not recorded in returned report",
+    "nodeVersion": "not recorded in returned report",
+    "pnpmVersion": "not recorded in returned report"
+  },
+  "claimCeiling": "Exact-candidate macOS functional PASS; no hardware- or version-specific claim and no real-user, production, publication, adoption, or market claim.",
+  "importerDirectlyWitnessedExecution": false
+}

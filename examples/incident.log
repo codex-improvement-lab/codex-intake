@@ -1,0 +1,3 @@
+pnpm test -- checkout-export
+ERROR TypeError: locator is undefined
+Authorization: Bearer example_redact_me

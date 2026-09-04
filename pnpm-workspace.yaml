@@ -1,0 +1,7 @@
+storeDir: .pnpm-store
+cacheDir: .pnpm-cache
+
+allowBuilds:
+  esbuild: true
+  tesseract.js: true
+

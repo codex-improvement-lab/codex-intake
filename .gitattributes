@@ -1,0 +1,6 @@
+* text=auto eol=lf whitespace=-blank-at-eof
+*.png binary
+*.jpg binary
+*.gz binary
+*.zip binary
+docs/evidence/macos/* -text

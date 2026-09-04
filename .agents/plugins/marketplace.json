@@ -1,0 +1,20 @@
+{
+  "name": "codex-intake-local",
+  "interface": {
+    "displayName": "Codex Intake Local"
+  },
+  "plugins": [
+    {
+      "name": "codex-intake",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-intake"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

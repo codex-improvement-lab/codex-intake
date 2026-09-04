@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Intake"
+  short_description: "Turn messy inputs into source-linked briefs"
+  default_prompt: "Turn these task inputs into an editable, source-linked brief."

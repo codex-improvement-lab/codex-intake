@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Codex Intake mark</title>
+  <desc id="desc">Three evidence lines entering a coral source card.</desc>
+  <rect width="512" height="512" rx="88" fill="#F4F0E6"/>
+  <rect x="98" y="86" width="316" height="340" rx="34" fill="#FF5C35" stroke="#17211C" stroke-width="22"/>
+  <path d="M164 184h184M164 256h184M164 328h122" stroke="#17211C" stroke-width="24" stroke-linecap="square"/>
+  <circle cx="350" cy="328" r="30" fill="#D9FF71" stroke="#17211C" stroke-width="16"/>
+</svg>
+
