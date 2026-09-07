@@ -25,7 +25,7 @@ test("the demo explains the product and preserves pointer navigation", async ({ 
   await expect(page.locator("#brief-title")).toHaveValue("Checkout export crashes after redaction");
   await expect(page.locator("[data-source-card]")).toHaveCount(3);
   await expect(page.locator("#risk-count")).toHaveText("3");
-  await expect(page.locator(".criteria-list .criterion")).toHaveCount(5);
+  await expect(page.locator(".criteria-list .criterion")).toHaveCount(8);
 
   await page.locator("[data-trace='S01']").click();
   await expect(page.locator("[data-source-card='S01']")).toHaveClass(/source-pulse/);
@@ -51,6 +51,18 @@ test("the demo explains the product and preserves pointer navigation", async ({ 
     path: evidenceScreenshotPath(testInfo, "codex-intake-full.png"),
     fullPage: true
   });
+});
+
+test("thirty detected requirements remain reviewable and unconfirmed in the browser export", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#file-input").setInputFiles({ name: "requirements.txt", mimeType: "text/plain",
+    buffer: Buffer.from(Array.from({ length: 30 }, (_, i) => `Must preserve requirement ${i + 1}`).join("\n")) });
+  await expect(page.locator(".criteria-list .criterion")).toHaveCount(30);
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#download-json-button").click();
+  const data = JSON.parse(await readFile(await (await downloadPromise).path(), "utf8"));
+  expect(data.coverage.representedSignals).toBe(30);
+  expect(data.doneWhen.every(item => item.confirmation === "candidate")).toBe(true);
 });
 
 test("Markdown export is downloadable and omits raw source bodies", async ({ page }) => {

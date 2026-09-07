@@ -36,6 +36,8 @@ Updates operate within the current page session. The CLI shares the compiler and
 
 The deterministic compiler is deliberately modest: it discovers problem signals, requirement language, commands, paths, URLs, and common privacy risks. It labels these as rule-derived candidates rather than pretending a local regex is understanding the task.
 
+The development candidate retains all detected signals and generates candidates for every detected requirement, failure and command. JSON includes `coverage` with each signal's candidate IDs or explicit exclusion; Markdown reports the count. Finding and acceptance text is not shortened; source-pointer excerpts remain previews. Detection coverage does not establish that every requirement was understood, and candidates remain unconfirmed until reviewed.
+
 ## Try the 20-second demo
 
 Requirements: Node.js 20.19 or newer and pnpm 11.19.0.

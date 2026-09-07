@@ -1,4 +1,4 @@
-import { redactText } from "./intake.js";
+import { describeCoverage, redactText } from "./intake.js";
 
 export function pointerLabel(pointer) {
   return pointer ? `${pointer.sourceId}:${pointer.locator}${pointer.sourceId !== "USER" && pointer.sourceRevision ? ` · r${pointer.sourceRevision}` : ""}` : "NO-SOURCE";
@@ -23,6 +23,7 @@ export function toPortableBrief(brief) {
     objective: redactText(brief.objective),
     fieldOwnership: { title: brief.fieldOwnership?.title || "rule-derived", objective: brief.fieldOwnership?.objective || "rule-derived" },
     situation: redactText(brief.situation),
+    coverage: describeCoverage(brief),
     primaryPointer: portablePointer(brief.primaryPointer),
     doneWhen: brief.doneWhen
       .filter((item) => item.included !== false)
@@ -31,6 +32,7 @@ export function toPortableBrief(brief) {
         text: redactText(item.text),
         confidence: item.confidence,
         rule: item.rule,
+        findingId: item.findingId ?? null,
         authorship: item.authorship || (item.rule === "user-authored" ? "user-authored" : "rule-derived"),
         confirmation: item.reviewStatus === "needs-review" ? "needs-review" : item.confirmed ? "user-confirmed" : "candidate",
         pointer: portablePointer(item.pointer),
@@ -105,6 +107,8 @@ export function toMarkdown(brief) {
     `Primary evidence: ${mdPointer(portable.primaryPointer)}`,
     "",
     "## Done when",
+    "",
+    `Coverage of detected signals: ${portable.coverage.representedSignals}/${portable.coverage.acceptanceSignals} have acceptance candidates or an explicit exclusion; ${portable.coverage.omittedSignals} signals omitted. Rules do not establish that every requirement was understood.`,
     ""
   ];
 

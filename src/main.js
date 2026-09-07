@@ -326,7 +326,7 @@ function renderBrief() {
     ? brief.gaps
         .map((gap) => `<li><span>?</span><p>${escapeHtml(gap.text)}</p>${pointerButton(gap.pointer)}</li>`)
         .join("")
-    : `<li><span>✓</span><p>No deterministic intake gaps detected.</p></li>`;
+    : `<li><span>·</span><p>No deterministic intake gaps detected. All detected signals are retained; rules do not establish that every requirement was understood.</p></li>`;
 
   elements.briefContent.innerHTML = `<div class="brief-sheet">
     <div class="sheet-index"><span>BRIEF / ${brief.sources.map((source) => source.id).join("+")}</span><span>${escapeHtml(brief.engine.mode)}</span></div>

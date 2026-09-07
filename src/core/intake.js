@@ -217,7 +217,7 @@ function finding(source, lineIndex, category, text, rule) {
   return {
     id: `F-${source.id}-${String(lineIndex + 1).padStart(3, "0")}-${category}`,
     category,
-    text: concise(text),
+    text: redactText(String(text).replace(/\s+/g, " ").trim()),
     confidence: "rule-derived",
     rule,
     pointer: pointerFor(source, lineIndex, text)
@@ -274,7 +274,7 @@ function scanFindings(source) {
     }
   }
 
-  return results.slice(0, 24);
+  return results;
 }
 
 function firstUsefulLine(sources) {
@@ -299,32 +299,33 @@ function titleFrom(sources, findings) {
 
 function deriveDoneWhen(findings, risks) {
   const criteria = [];
-  const add = (text, pointer, rule) => {
-    if (!pointer || criteria.some((item) => item.rule === rule)) return;
+  const add = (text, pointer, rule, findingId = null) => {
+    if (!pointer) return;
     criteria.push({
       id: `D${String(criteria.length + 1).padStart(2, "0")}`,
-      text: concise(text, 220),
+      text: redactText(text),
       included: true,
+      confirmed: false,
       confidence: "rule-derived",
       rule,
+      findingId,
       pointer
     });
   };
 
   const requirement = findings.find((item) => item.category === "requirement");
   const problem = findings.find((item) => item.category === "problem");
-  const command = findings.find((item) => item.category === "command");
   const anchor = requirement || problem || findings[0];
 
-  if (requirement) {
-    add(`The requested behavior is observably satisfied: “${requirement.text}”`, requirement.pointer, "requirement-satisfied");
+  for (const item of findings.filter(item => item.category === "requirement")) {
+    add(`The requested behavior is observably satisfied: “${item.text}”`, item.pointer, "requirement-satisfied", item.id);
   }
-  if (problem) {
-    add(`The recorded failure no longer occurs: “${problem.text}”`, problem.pointer, "failure-removed");
-    add("Automated regression coverage exercises the observed failure path and passes.", problem.pointer, "regression-coverage");
+  for (const item of findings.filter(item => item.category === "problem")) {
+    add(`The recorded failure no longer occurs: “${item.text}”`, item.pointer, "failure-removed", item.id);
+    add(`Automated regression coverage exercises the observed failure path and passes: “${item.text}”`, item.pointer, "regression-coverage", item.id);
   }
-  if (command) {
-    add(`The recorded verification command completes successfully: ${command.text}`, command.pointer, "command-passes");
+  for (const item of findings.filter(item => item.category === "command")) {
+    add(`The recorded verification command completes successfully: ${item.text}`, item.pointer, "command-passes", item.id);
   }
   if (risks.length) {
     add(
@@ -337,7 +338,24 @@ function deriveDoneWhen(findings, risks) {
     add("A reviewer can verify the intended outcome against the supplied source context.", anchor.pointer, "reviewable-outcome");
   }
 
-  return criteria.slice(0, 6);
+  return criteria;
+}
+
+// This measures rule-detected signals, not semantic completeness or confirmation.
+export function describeCoverage(brief) {
+  const signals = brief.findings.filter(item => ["requirement", "problem", "command"].includes(item.category)
+    && item.reviewStatus !== "needs-review");
+  const dispositions = signals.map(item => {
+    const candidates = brief.doneWhen.filter(candidate => candidate.findingId === item.id
+      && candidate.pointer.sourceRevision === item.pointer.sourceRevision
+      && candidate.reviewStatus !== "needs-review");
+    return { findingId: item.id, candidateIds: candidates.map(candidate => candidate.id),
+      disposition: candidates.some(candidate => candidate.included !== false) ? "candidate"
+        : candidates.length ? "excluded-by-user" : "unrepresented" };
+  });
+  return { scope: "rule-detected-signals", detectedSignals: brief.findings.filter(item => item.reviewStatus !== "needs-review").length,
+    acceptanceSignals: signals.length, representedSignals: dispositions.filter(item => item.disposition !== "unrepresented").length,
+    omittedSignals: 0, dispositions };
 }
 
 function deriveGaps(sources, findings) {

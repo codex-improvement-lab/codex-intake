@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Proofline mainline candidate
+
+- Generate acceptance candidates for every detected requirement, problem and command; remove silent 24-signal and 6-criterion limits. Keep complete redacted finding and acceptance text.
+- Export explicit detected-signal coverage and candidate/exclusion dispositions. Coverage measures deterministic extraction, not semantic completeness or user confirmation.
+
+
 ## 0.2.0-rc.1 — 2026-09-05
 
 - Preview additions, replacements, removals and OCR updates before applying a source batch; accept, discard, or undo the latest accepted update.

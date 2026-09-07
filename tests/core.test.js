@@ -30,6 +30,33 @@ describe("deterministic intake compiler", () => {
     expect(compileIntake(DEMO_SOURCES)).toEqual(compileIntake(DEMO_SOURCES));
   });
 
+  it("represents every detected requirement, problem and command with reviewable candidates", () => {
+    const brief = compileIntake([{ name: "request.txt", kind: "text", content: [
+      "Must preserve source identifiers", "Should mask credentials", "Need offline export",
+      "ERROR: export stopped", "FAILED: source update", "node verify.mjs", "pnpm test"
+    ].join("\n") }]);
+    expect(brief.findings).toHaveLength(7);
+    expect(brief.doneWhen).toHaveLength(9);
+    for (const signal of brief.findings) {
+      expect(brief.doneWhen.some(item => item.findingId === signal.id)).toBe(true);
+    }
+    expect(toPortableBrief(brief).doneWhen.every(item => item.confirmation === "candidate")).toBe(true);
+    expect(validateProvenance(brief)).toEqual([]);
+  });
+
+  it("does not truncate the thirtieth detected requirement or its acceptance text", () => {
+    const suffix = " and preserve the final requirement condition";
+    const longRequirement = `Must ${"preserve selected evidence ".repeat(20)}${suffix}`;
+    const brief = compileIntake([{ name: "many.txt", kind: "text", content:
+      [...Array.from({ length: 29 }, (_, i) => `Must satisfy requirement ${i + 1}`), longRequirement].join("\n") }]);
+    expect(brief.findings).toHaveLength(30);
+    expect(brief.doneWhen).toHaveLength(30);
+    expect(brief.doneWhen.at(-1).text).toContain(suffix);
+    const portable = toPortableBrief(brief);
+    expect(portable.coverage).toMatchObject({ detectedSignals: 30, acceptanceSignals: 30, representedSignals: 30, omittedSignals: 0 });
+    expect(toMarkdown(brief)).toContain("Coverage of detected signals");
+  });
+
   it("keeps screenshot uncertainty explicit until OCR runs", () => {
     const brief = compileIntake([
       { name: "failure.png", kind: "screenshot", byteSize: 1200, content: "" }
