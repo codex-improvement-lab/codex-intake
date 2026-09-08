@@ -12,6 +12,7 @@ Turn the selected inputs into a task contract without inventing missing facts.
 - For text, logs, URLs, and file inventories, use the plugin-root `scripts/intake.mjs` CLI. Resolve the plugin root as two directories above this `SKILL.md`.
 - For screenshots or when the user needs to edit the draft visually, use the local Web dropzone from the plugin root with `pnpm install` and `pnpm dev`. Local OCR supports English and Simplified Chinese after dependencies are installed.
 - For an existing Codex Intake Markdown or JSON export, read it directly and preserve its source pointers.
+- For an existing `intake-requirements/1` snapshot, use plugin-root `scripts/requirements.mjs` to continue explicit review and export to Proofline. New candidates are not confirmed merely because they were generated; confirm only requirements covered by the user's stated scope or explicit review decision.
 
 Do not fetch a registered URL, read an unselected path, call a model API, or upload material unless the user separately asks for that action.
 
@@ -30,3 +31,7 @@ The brief is ready when every extracted finding, privacy warning, gap, and gener
 Use the Web UI's source-update review for additions, replacements, removals or OCR refreshes. Accept/discard applies to the source batch, separately from requirement confirmation. Undo reverses the last source update while keeping manual edits, including later edits.
 
 In schema 1.1 exports, preserve `candidate`, `user-confirmed` and `needs-review` distinctions. A retained edit can point to an older revision in `sourceHistory`; do not present that as current evidence. `USER:manual` plus `previousPointer` means the user kept a requirement as their own decision, not that new evidence supports it. Confirmation is a scope decision, not proof that a task or test passed.
+
+For cross-session requirements, save a scoped snapshot from the browser or use `node scripts/requirements.mjs prepare --scope <project> --out <new-snapshot> <selected-text-files>`. Continue from a saved file with `--previous`. Review names specific IDs; revise keeps a logical ID but resets confirmation, exclude withdraws it, and keep records explicit manual retention with the previous pointer. Do not silently attach kept manual requirements to a newly selected source. Source renames and ambiguous repeated signals require review.
+
+Inspect detected-signal coverage and explicit exclusions. It does not establish semantic completeness. Saved snapshots contain redacted requirements and pointers, not source bodies. Keep this path optional for already clear tasks; extra snapshots, review and import steps are real maintenance costs.

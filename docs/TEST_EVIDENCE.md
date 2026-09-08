@@ -1,5 +1,7 @@
 # Test evidence
 
+The mainline development candidate has separate local validation in [MAINLINE_CANDIDATE.md](../release/MAINLINE_CANDIDATE.md). The 2026-09-05 publication results below remain historical and are not transferred to its new code.
+
 Current publication preparation: 2026-09-05, v0.2.0-rc.1. The v0.1.0 baseline was released independently first.
 
 - Local Windows / Node 24.19.0 / pnpm 11.19.0: 26/26 unit, CLI and platform tests; 12/12 Chromium scenarios, including real local Tesseract OCR from synthetic images.
