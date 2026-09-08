@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "lab-mainline-candidate/1",
+  "product": "codex-intake",
+  "status": "development-candidate-awaiting-product-review",
+  "date": "2026-09-08",
+  "branch": "dev/proofline-mainline-2026-09-08",
+  "sourceCommit": "6a6603018120b27dbb4b2288726e20f3e045d55b",
+  "basePackageVersion": "0.2.0-rc.1",
+  "host": "Windows / Node v24.19.0",
+  "checks": {
+    "unitCliPlatform": 33,
+    "chromiumScenarios": 14,
+    "releaseCheck": "passed",
+    "cleanSourceFullReleaseCheck": "passed",
+    "freshFrozenDependencyInstall": "passed",
+    "marketplace": "74 files; sha256 23b4ee7414dc85a2ea9c57f89edfe2a3b849be2fa45a54e58ff9733fd4130dc6",
+    "pluginVersion": "0.2.0-rc.1+codex.20260908002045"
+  },
+  "notes": [
+    "Core CLI and requirements prepare ran from the extracted archive before installing dependencies.",
+    "The first offline dependency install lacked the chi_sim tarball; frozen-lockfile installation with network access succeeded, followed by the complete clean-source release check.",
+    "Detected-signal coverage does not establish semantic completeness; new candidates remain unconfirmed.",
+    "The initial new snapshot browser test and a narrow layout regression were corrected before final 14/14 runs."
+  ],
+  "evidenceLimits": {
+    "hostedCI": "not-run for this candidate",
+    "physicalMac": "not-run for this candidate; historical evidence not transferred",
+    "freshTaskPluginActivation": "not-run",
+    "externalUserValidation": "not-run",
+    "release": "not published; next release version and publication require product review"
+  },
+  "artifacts": [
+    {
+      "file": "codex-intake-mainline-20260908-6a66030-source.zip",
+      "sha256": "c6f4312219f0531d6b0da82c0d048f2e6ead84b63d5027fc2ea4df72c6099dfc",
+      "bytes": 764686
+    }
+  ]
+}
