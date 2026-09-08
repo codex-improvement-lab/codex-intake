@@ -18,6 +18,14 @@
   text-rendering: optimizeLegibility;
 }
 
+.requirements-export { flex-basis: 100%; min-width: 0; max-width: 100%; font-size: 12px; }
+.requirements-export summary { cursor: pointer; }
+.requirements-export-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.requirements-export label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
+.requirements-export input { min-width: 0; width: 140px; max-width: 100%; padding: 6px; border: 1px solid currentColor; }
+.requirements-export small { flex-basis: 100%; }
+.export-bar { flex-wrap: wrap; }
+
 * {
   box-sizing: border-box;
 }
@@ -1285,6 +1293,9 @@ body.trace-active .source-card.trace-dim { filter: grayscale(.65); }
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .export-bar { flex-wrap: nowrap; }
+  .requirements-export { flex-basis: auto; width: 100%; }
 
   .trace-lens { grid-template-columns: auto 1fr; }
   .trace-lens .button { grid-column: 1 / -1; }

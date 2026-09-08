@@ -11,6 +11,7 @@ import {
 import { pointerLabel, toCodexPrompt, toJson, toMarkdown } from "./core/export.js";
 import { DEMO_SOURCES } from "./demo.js";
 import { buildReviewedBrief, planSourceUpdate, replaceSourceInput } from "./core/source-updates.js";
+import { createRequirements } from "./core/requirements.js";
 
 const elements = {
   sourceCount: document.querySelector("#source-count"),
@@ -43,12 +44,14 @@ const elements = {
   traceClear: document.querySelector("#trace-clear-button"),
   downloadJson: document.querySelector("#download-json-button"),
   downloadMarkdown: document.querySelector("#download-md-button"),
+  downloadRequirements: document.querySelector("#download-requirements-button"),
   copy: document.querySelector("#copy-button"),
   toast: document.querySelector("#toast")
 };
 
 let inputs = [];
 let brief = null;
+let requirementSnapshot = null;
 let editOwnership = createEditOwnership();
 let composerMode = "text";
 let toastTimer;
@@ -121,7 +124,7 @@ function syncUpdateControls() {
   for (const control of controls) if (control) control.disabled = sourceBusy || Boolean(pendingUpdate);
   elements.dropzone.setAttribute("aria-disabled", String(sourceBusy || Boolean(pendingUpdate)));
   for (const control of elements.briefContent.querySelectorAll("input,textarea,button")) control.disabled = Boolean(pendingUpdate);
-  for (const control of [elements.downloadJson, elements.downloadMarkdown, elements.copy]) control.disabled = Boolean(pendingUpdate);
+  for (const control of [elements.downloadJson, elements.downloadMarkdown, elements.downloadRequirements, elements.copy]) control.disabled = Boolean(pendingUpdate);
   document.querySelector("#undo-source-update").disabled = sourceBusy || Boolean(pendingUpdate);
 }
 
@@ -523,6 +526,7 @@ function clearDesk(showNotice = true) {
   previewUrls.clear();
   inputs = [];
   brief = null;
+  requirementSnapshot = null;
   pendingUpdate = null;
   undoInputs = null;
   nextSourceNumber = 1;
@@ -747,6 +751,19 @@ elements.traceClear.addEventListener("click", clearTrace);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && traceSourceId) clearTrace();
 });
+elements.downloadRequirements.addEventListener("click", async () => {
+  if (!brief || pendingUpdate) return;
+  const scope = document.querySelector("#requirement-scope").value.trim();
+  const epoch = deskEpoch;
+  try {
+    const snapshot = await createRequirements(structuredClone(brief), { scope,
+      previous: requirementSnapshot?.scope === scope ? requirementSnapshot : null });
+    if (epoch !== deskEpoch || pendingUpdate) return;
+    requirementSnapshot = snapshot;
+    download(`${scope}-requirements-r${snapshot.revision}.json`, `${JSON.stringify(snapshot, null, 2)}\n`, "application/json");
+  } catch (error) { notify(error.message); }
+});
+
 elements.downloadJson.addEventListener("click", () => {
   download("codex-intake-brief.json", toJson(brief), "application/json");
   notify("Redacted JSON downloaded.");

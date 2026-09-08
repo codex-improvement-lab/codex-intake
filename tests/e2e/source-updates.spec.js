@@ -40,6 +40,34 @@ test("a source replacement previews changes, discards cleanly, accepts, and undo
   expect(await exportJson(page)).toBe(before);
 });
 
+test("reviewed requirements export preserves explicit decisions and stable unrelated signals", async ({ page }, testInfo) => {
+  await page.goto("/");
+  await page.locator("#file-input").setInputFiles({ name: "request.txt", mimeType: "text/plain",
+    buffer: Buffer.from("Must preserve all signals.\nMust mask credentials.") });
+  for (const button of await page.locator("[data-confirm-criterion]").all()) await button.click();
+  async function snapshot() {
+    const details = page.locator("details.requirements-export");
+    if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
+    await page.locator("#requirement-scope").fill("browser-lab");
+    const downloaded = page.waitForEvent("download");
+    await page.locator("#download-requirements-button").click();
+    return JSON.parse(await readFile(await (await downloaded).path(), "utf8"));
+  }
+  const first = await snapshot();
+  expect(first.requirements.every(item => item.confirmation === "user-confirmed")).toBe(true);
+  await updateText(page, "S01", "Updated heading\nMust preserve thirty signals.\nMust mask credentials.");
+  await accept(page);
+  const after = await snapshot();
+  const stable = first.requirements.find(item => item.text.includes("mask credentials"));
+  expect(after.requirements.find(item => item.id === stable.id)).toMatchObject({ revision: 1, confirmation: "user-confirmed" });
+  expect(after.requirements.find(item => item.text.includes("thirty"))).toMatchObject({ confirmation: "candidate" });
+  await page.screenshot({ path: testInfo.outputPath("requirements-desktop.png"), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("details.requirements-export").scrollIntoViewIfNeeded();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("requirements-narrow.png"), fullPage: true });
+});
+
 test("replacement preserves edited content and separates candidates from a retained user requirement", async ({ page }) => {
   const secret = ["synthetic", "private", "value"].join("");
   await demo(page);

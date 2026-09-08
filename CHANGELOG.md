@@ -2,6 +2,9 @@
 
 ## Unreleased — Proofline mainline candidate
 
+- Add scoped, durable requirement snapshots and explicit CLI review/revise/keep/exclude decisions. Browser saving uses the same snapshot model; saved files contain redacted text and pointers, not raw source bodies.
+- Preserve confirmation for unique, identical full source signals across unrelated edits or line moves; changed masked values and ambiguous duplicates require review.
+
 - Generate acceptance candidates for every detected requirement, problem and command; remove silent 24-signal and 6-criterion limits. Keep complete redacted finding and acceptance text.
 - Export explicit detected-signal coverage and candidate/exclusion dispositions. Coverage measures deterministic extraction, not semantic completeness or user confirmation.
 

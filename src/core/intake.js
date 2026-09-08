@@ -220,6 +220,8 @@ function finding(source, lineIndex, category, text, rule) {
     text: redactText(String(text).replace(/\s+/g, " ").trim()),
     confidence: "rule-derived",
     rule,
+    sourceSignal: text,
+    signalExact: true,
     pointer: pointerFor(source, lineIndex, text)
   };
 }
@@ -274,6 +276,12 @@ function scanFindings(source) {
     }
   }
 
+  const multiplicities = new Map();
+  for (const item of results) {
+    const key = JSON.stringify([item.rule, item.sourceSignal]);
+    multiplicities.set(key, (multiplicities.get(key) || 0) + 1);
+  }
+  for (const item of results) item.signalMultiplicity = multiplicities.get(JSON.stringify([item.rule, item.sourceSignal]));
   return results;
 }
 
@@ -299,6 +307,7 @@ function titleFrom(sources, findings) {
 
 function deriveDoneWhen(findings, risks) {
   const criteria = [];
+  const byId = new Map(findings.map(item => [item.id, item]));
   const add = (text, pointer, rule, findingId = null) => {
     if (!pointer) return;
     criteria.push({
@@ -309,6 +318,9 @@ function deriveDoneWhen(findings, risks) {
       confidence: "rule-derived",
       rule,
       findingId,
+      sourceSignal: byId.get(findingId)?.sourceSignal ?? pointer.excerpt,
+      signalMultiplicity: byId.get(findingId)?.signalMultiplicity ?? 1,
+      signalExact: byId.get(findingId)?.sourceSignal !== undefined,
       pointer
     });
   };

@@ -23,7 +23,7 @@ Add several files, update a pasted source, replace a selected file, remove a sou
 
 **Rule candidate**, **Edited candidate**, and **User confirmed** are distinct. Accepting a source batch does not confirm its requirements. For a stale requirement, **Keep as my requirement** records an explicit user decision with its previous reference; it does not assert that the replacement source supports the old wording.
 
-Updates operate within the current page session. The CLI shares the compiler and export format; it is not a persistent draft editor. See [source-update semantics and examples](docs/SOURCE_UPDATES.md).
+Updates operate within the current page session. Save reviewed requirements for a later CLI session using the new [requirement snapshot loop](docs/REQUIREMENT_SNAPSHOTS.md); this preserves decisions and pointers without persisting the raw desk. The ordinary brief CLI continues to share the compiler/export format. See [source-update semantics and examples](docs/SOURCE_UPDATES.md).
 
 ## The product loop
 

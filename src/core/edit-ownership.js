@@ -24,11 +24,17 @@ function sourceKey(source) { return `${source.id}@${source.revision ?? 1}`; }
 function pointerKey(pointer) { return `${pointer.sourceId}@${pointer.sourceRevision ?? 1}`; }
 function stillSupported(candidate, record) {
   const original = record.origin;
-  return candidate.rule === original.rule && candidate.text === original.text
-    && candidate.pointer.sourceId === original.pointer.sourceId
-    && (candidate.pointer.sourceRevision ?? 1) === (original.pointer.sourceRevision ?? 1)
+  if (candidate.rule !== original.rule || candidate.text !== original.text
+    || candidate.pointer.sourceId !== original.pointer.sourceId) return false;
+  // A unique, identical full source signal can move within a changed source.
+  // Raw selected text is compared only in memory and never exported.
+  if (candidate.signalMultiplicity === 1 && original.signalMultiplicity === 1
+    && candidate.signalExact === true && original.signalExact === true
+    && candidate.sourceSignal !== undefined && original.sourceSignal !== undefined) {
+    return candidate.sourceSignal === original.sourceSignal;
+  }
+  return (candidate.pointer.sourceRevision ?? 1) === (original.pointer.sourceRevision ?? 1)
     && candidate.pointer.locator === original.pointer.locator
-    && candidate.pointer.excerpt === original.pointer.excerpt
     && candidate.sourceSnapshot?.digest === original.sourceSnapshot?.digest;
 }
 function materializeManualCriterion(record) {
