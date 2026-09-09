@@ -8,9 +8,11 @@ Codex Intake is a local-first dropzone for the awkward minute before real work b
 
 > **Signature interaction — Provenance Lens.** Choose **Trace links** on any real source card—or select a pointer—to illuminate every linked brief signal and dim unrelated material. The lens follows stored pointers; it never invents provenance. See the [Proofing Press design direction](docs/design-system.md).
 
-> v0.3.0-rc.1 candidate · review selected requirements together · keep source revisions · no API key · no telemetry
+> [v0.3.0-rc.1 public preview](https://github.com/codex-improvement-lab/codex-intake/releases/tag/v0.3.0-rc.1) · review selected requirements together · keep source revisions · no API key · no telemetry
 
-For CLI continuation, [save a reviewed requirement snapshot](docs/REQUIREMENT_SNAPSHOTS.md), then confirm or revoke explicit IDs in one revision-checked operation. Proofline 0.2.0-rc.1 reads that file directly. [Candidate release notes](release/RELEASE_NOTES_v0.3.0-rc.1.md) include the evidence and cost boundaries: the original 14/29-operation result is retained; the simplified replay is 14/22 and still does not beat the strong baseline.
+For CLI continuation, [save a reviewed requirement snapshot](docs/REQUIREMENT_SNAPSHOTS.md), then confirm or revoke explicit IDs in one revision-checked operation. Proofline 0.2.0-rc.1 reads that file directly. [Release notes](release/RELEASE_NOTES_v0.3.0-rc.1.md) include the evidence and cost boundaries: the original 14/29-operation result is retained; the simplified replay is 14/22 and still does not beat the strong baseline.
+
+[Publication evidence and verified downloads](release/PUBLICATION_v0.3.0-rc.1.md).
 
 ## Sources changed. Keep the work you reviewed.
 

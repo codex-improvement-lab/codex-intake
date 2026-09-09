@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "lab-publication/1",
+  "product": "codex-intake",
+  "version": "0.3.0-rc.1",
+  "sourceCommit": "3a5101a0a5878a92246b3f9436ca02e620e11097",
+  "tag": "v0.3.0-rc.1",
+  "releaseId": 385705455,
+  "url": "https://github.com/codex-improvement-lab/codex-intake/releases/tag/v0.3.0-rc.1",
+  "publishedAt": "2026-09-09T17:09:04Z",
+  "prerelease": true,
+  "sourceCI": {
+    "id": 34378877331,
+    "source": "3a5101a0a5878a92246b3f9436ca02e620e11097",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/34378877331",
+    "jobs": [
+      {
+        "name": "browser-loop",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "portable-core (ubuntu-latest)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "portable-core (windows-latest)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "portable-core (macos-latest)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "name": "codex-intake-0.3.0-rc.1-source.zip",
+      "bytes": 1173481,
+      "sha256": "52f79d57a0b33b129006410eb9803a921d92188a8b21fa5e0b5748bd031274be",
+      "url": "https://github.com/codex-improvement-lab/codex-intake/releases/download/v0.3.0-rc.1/codex-intake-0.3.0-rc.1-source.zip"
+    },
+    {
+      "name": "codex-intake-0.3.0-rc.1-source.zip.sha256",
+      "bytes": 101,
+      "sha256": "3c4801e14f27cfd8a6e27825dae1bf55bb6e78083e114f355c57acacf8e3bd35",
+      "url": "https://github.com/codex-improvement-lab/codex-intake/releases/download/v0.3.0-rc.1/codex-intake-0.3.0-rc.1-source.zip.sha256"
+    }
+  ],
+  "ownerValidation": {
+    "kind": "synthetic-installed-cli-validation",
+    "versions": {
+      "intake": "0.3.0-rc.1",
+      "proofline": "0.2.0-rc.1",
+      "workprint": "0.3.0-rc.3"
+    },
+    "assertions": {
+      "atomicInvalidId": true,
+      "staleSnapshotRevisionRejected": true,
+      "explicitBatchConfirmed": true,
+      "nonDefaultManifest": true,
+      "differentCallerDirectory": true,
+      "directIntakeContract": true,
+      "initialVerified": 2,
+      "changedGap": "AC-OUTPUT/check",
+      "finalVerified": 2,
+      "returnedCommandArgvExecuted": true,
+      "returnedCaptureArgvExecuted": true,
+      "staleActionRejectedWithoutLedgerWrite": true,
+      "unchangedReceiptAndObservationRevisionRetained": true,
+      "publicProjectionPrivacy": true,
+      "workprintBuildAndVerify": true
+    },
+    "rawLocalRecordSha256": "3d24eab5a427ba1c4895cb490a63a4ea492b0ec039bec4607a6bc7e033622e56",
+    "rawRecordRetention": "Maintainer-local; public summary omits local paths and command arguments"
+  },
+  "evidenceLimits": {
+    "physicalMac": "not run for this version",
+    "freshTaskPluginActivation": "not run",
+    "realUsers": "not run",
+    "costEvidence": "Controlled internal replay: 14 baseline / 22 assisted operations; original 14/29 retained. No human-time, agent-time or token advantage established."
+  }
+}
