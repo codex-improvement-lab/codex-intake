@@ -19,6 +19,7 @@ const includedPaths = [
   "release/MACOS_VALIDATION_RESULT.template.md",
   "release/RELEASE_NOTES_v0.1.0.md",
   "release/RELEASE_NOTES_v0.2.0-rc.1.md",
+  "release/RELEASE_NOTES_v0.3.0-rc.1.md",
   "release/MAINLINE_CANDIDATE.md",
   "scripts",
   "skills",

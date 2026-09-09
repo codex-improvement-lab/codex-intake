@@ -1,29 +1,53 @@
 #!/usr/bin/env node
-import { readFile, stat, writeFile } from "node:fs/promises";
+import { link, open, readFile, stat, unlink } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { assignSourceIds, compileIntake, normalizeText } from "../src/core/intake.js";
-import { contentDigest, createRequirements, reviewRequirement, validateRequirements } from "../src/core/requirements.js";
+import { contentDigest, createRequirements, reviewRequirement, reviewRequirements, validateRequirements } from "../src/core/requirements.js";
 
 const HELP = `Intake reviewed requirement snapshots (local, explicit files only)
   node scripts/requirements.mjs prepare --scope <project> [--previous <snapshot.json>] [--out <snapshot.json>] <text-files...>
   node scripts/requirements.mjs review --input <snapshot.json> --id <id> --decision confirm|candidate|exclude|keep|revise [--text <text>] [--out <snapshot.json>]
+  node scripts/requirements.mjs review --input <snapshot.json> --revision <n> --id <id> --id <id> --decision confirm|candidate [--out <snapshot.json>]
 Omit --out to write one JSON document to stdout. New rule candidates remain unconfirmed.
+Multiple-ID review requires the exact read snapshot revision and publishes all selected decisions together.
 Review decisions are explicit caller declarations, not authenticated human signatures.
 `;
-async function readSnapshot(file) { return validateRequirements(JSON.parse(await readFile(path.resolve(file), "utf8"))); }
+async function readSnapshot(file) {
+  const raw = await readFile(path.resolve(file), "utf8");
+  let value;
+  try { value = JSON.parse(raw.replace(/^\uFEFF/u, "")); } catch { throw new Error("Selected requirement snapshot is not valid JSON."); }
+  return validateRequirements(value);
+}
+async function writeNewSnapshot(file, output) {
+  const target = path.resolve(file);
+  const temporary = path.join(path.dirname(target), `.intake-requirements-${randomUUID()}.tmp`);
+  let created = false;
+  try {
+    const handle = await open(temporary, "wx", 0o600);
+    created = true;
+    try { await handle.writeFile(output, "utf8"); await handle.sync(); } finally { await handle.close(); }
+    // link publishes complete bytes atomically and refuses an existing target.
+    await link(temporary, target);
+  } finally {
+    if (created) await unlink(temporary);
+  }
+}
 async function main() {
   const [command, ...args] = process.argv.slice(2);
   if (!command || command === "--help") { process.stdout.write(HELP); return; }
-  const allowed = command === "prepare" ? ["scope", "previous", "out"] : command === "review" ? ["input", "id", "decision", "text", "out"] : [];
+  const allowed = command === "prepare" ? ["scope", "previous", "out"] : command === "review" ? ["input", "id", "decision", "text", "out", "revision"] : [];
   if (!allowed.length) throw new Error("Use prepare or review.");
-  const options = {}, files = [];
+  const options = {}, files = [], ids = [];
   for (let i = 0; i < args.length; i += 1) {
     const token = args[i];
     if (!token.startsWith("--")) { files.push(token); continue; }
     const name = token.slice(2);
     if (!allowed.includes(name) || options[name] !== undefined) throw new Error(`Unsupported or repeated option: ${token}.`);
     if (!args[i + 1] || args[i + 1].startsWith("--")) throw new Error(`Missing value: ${token}.`);
-    options[name] = args[++i];
+    const value = args[++i];
+    if (name === "id") ids.push(value);
+    else options[name] = value;
   }
   let snapshot;
   if (command === "prepare") {
@@ -48,13 +72,21 @@ async function main() {
     }
     snapshot = await createRequirements(compileIntake(assignSourceIds(inputs)), { scope: options.scope || previous?.scope, previous });
   } else {
-    if (files.length || !options.input || !options.id || !options.decision) throw new Error("review requires --input, --id and --decision, without file positionals.");
+    if (files.length || !options.input || !ids.length || !options.decision) throw new Error("review requires --input, explicit --id selections and --decision, without file positionals.");
     if (options.text !== undefined && options.decision !== "revise") throw new Error("--text is supported only by the revise decision.");
-    snapshot = reviewRequirement(await readSnapshot(options.input), options.id, options.decision, options.text);
+    if (options.revision !== undefined && !/^[1-9]\d*$/.test(options.revision)) throw new Error("--revision must be a positive safe integer.");
+    const input = await readSnapshot(options.input);
+    const revision = options.revision === undefined ? undefined : Number(options.revision);
+    if (ids.length > 1 || (revision !== undefined && ["confirm", "candidate"].includes(options.decision))) {
+      snapshot = reviewRequirements(input, ids, options.decision, revision);
+    } else {
+      if (revision !== undefined && (!Number.isSafeInteger(revision) || revision !== input.revision)) throw new Error("Snapshot revision does not match --revision.");
+      snapshot = reviewRequirement(input, ids[0], options.decision, options.text);
+    }
   }
   const output = `${JSON.stringify(snapshot, null, 2)}\n`;
   if (options.out) {
-    await writeFile(path.resolve(options.out), output, { encoding: "utf8", flag: "wx" });
+    await writeNewSnapshot(options.out, output);
     process.stderr.write(`Wrote ${path.resolve(options.out)}\n`);
   } else process.stdout.write(output);
 }

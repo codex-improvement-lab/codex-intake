@@ -1,6 +1,6 @@
 {
   "name": "codex-intake",
-  "version": "0.2.0-rc.1",
+  "version": "0.3.0-rc.1",
   "private": true,
   "description": "Local-first dropzone that turns messy task inputs into editable, source-linked briefs.",
   "type": "module",

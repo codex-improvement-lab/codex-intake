@@ -1,13 +1,8 @@
 import { redactText } from "./intake.js";
 
-export const REQUIREMENTS_SCHEMA = "intake-requirements/1";
+import { REQUIREMENTS_SCHEMA, validateRequirements } from "./requirements-schema.js";
+export { REQUIREMENTS_SCHEMA, validateRequirements } from "./requirements-schema.js";
 const TOKEN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-const STATES = new Set(["candidate", "user-confirmed", "needs-review", "withdrawn"]);
-function fields(value, allowed) {
-  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(key => !allowed.includes(key))) {
-    throw new Error("Unsupported fields in requirement snapshot; raw content and extensions are not accepted.");
-  }
-}
 export async function contentDigest(text) {
   const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
@@ -17,41 +12,6 @@ function pointer(value) {
     locator: value.locator, excerpt: redactText(value.excerpt ?? "") };
 }
 function sourceKey(source) { return `${source.id}@${source.revision}`; }
-
-export function validateRequirements(value) {
-  fields(value, ["schemaVersion", "scope", "revision", "nextId", "nextSourceId", "requirements", "sources", "sourceHistory"]);
-  if (!value || value.schemaVersion !== REQUIREMENTS_SCHEMA || typeof value.scope !== "string" || value.scope.length > 64 || !TOKEN.test(value.scope || "")
-    || !Number.isSafeInteger(value.revision) || value.revision < 1 || !Number.isSafeInteger(value.nextId) || value.nextId < 1
-    || !Array.isArray(value.requirements) || !Array.isArray(value.sources) || !Array.isArray(value.sourceHistory)) {
-    throw new Error("Invalid intake-requirements/1 snapshot.");
-  }
-  const ids = new Set();
-  for (const source of [...value.sources, ...value.sourceHistory]) {
-    fields(source, ["id", "revision", "name", "kind", "lineCount", "digest", "digestAlgorithm"]);
-    if (!/^S\d{2,6}$/.test(source.id) || !Number.isSafeInteger(source.revision) || source.revision < 1
-      || typeof source.name !== "string" || !Number.isSafeInteger(source.lineCount) || source.lineCount < 0
-      || !["text", "log", "file-list", "screenshot", "url"].includes(source.kind)
-      || !["sha256", "fnv1a32"].includes(source.digestAlgorithm)
-      || !(source.digestAlgorithm === "sha256" ? /^[a-f0-9]{64}$/ : /^[a-f0-9]{8}$/).test(source.digest)) throw new Error("Invalid source metadata.");
-  }
-  const sources = new Set([...value.sources, ...value.sourceHistory].map(sourceKey));
-  for (const item of value.requirements) {
-    fields(item, ["id", "revision", "identityKey", "supportDigest", "supportKind", "text", "confirmation", "authorship", "pointer", "previousPointer", "disposition", "ambiguous"]);
-    if (!TOKEN.test(item.id || "") || !item.id.startsWith(`${value.scope}-R`) || ids.has(item.id)
-      || !Number.isSafeInteger(item.revision) || item.revision < 1 || !STATES.has(item.confirmation)
-      || typeof item.text !== "string" || !item.text.trim() || !/^[a-f0-9]{64}$/.test(item.identityKey || "")
-      || !/^[a-f0-9]{64}$/.test(item.supportDigest || "")) throw new Error("Invalid or duplicate requirement identity/state.");
-    ids.add(item.id);
-    for (const ref of [item.pointer, item.previousPointer].filter(Boolean)) {
-      fields(ref, ["sourceId", "sourceRevision", "locator", "excerpt"]);
-      if (!ref.sourceId || !ref.locator || (ref.sourceId !== "USER" && !sources.has(`${ref.sourceId}@${ref.sourceRevision}`))) {
-        throw new Error(`Unknown source revision for ${item.id}.`);
-      }
-    }
-    if (!item.pointer) throw new Error(`Missing source pointer for ${item.id}.`);
-  }
-  return value;
-}
 
 // Snapshot creation never confirms a new rule candidate. Prior explicit decisions
 // survive only an identical, unambiguous signal and identical acceptance text.
@@ -130,6 +90,35 @@ export function reviewRequirement(snapshot, id, decision, text = null) {
   }
   item.confirmation = decision === "exclude" ? "withdrawn" : ["confirm", "keep"].includes(decision) ? "user-confirmed" : "candidate";
   item.disposition = `reviewer-${decision}`;
+  result.revision += 1;
+  return validateRequirements(result);
+}
+
+export function reviewRequirements(snapshot, ids, decision, expectedRevision) {
+  validateRequirements(snapshot);
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || expectedRevision !== snapshot.revision) {
+    throw new Error("Snapshot revision does not match --revision; read the current snapshot before reviewing.");
+  }
+  if (snapshot.revision === Number.MAX_SAFE_INTEGER) throw new Error("Snapshot revision range exhausted.");
+  if (!["confirm", "candidate"].includes(decision)) throw new Error("Multiple-ID review supports confirm or candidate only.");
+  if (!Array.isArray(ids) || !ids.length || ids.some(id => typeof id !== "string" || !id)) throw new Error("Select at least one explicit requirement ID.");
+  if (new Set(ids).size !== ids.length) throw new Error("Duplicate requirement ID in review selection.");
+  const byId = new Map(snapshot.requirements.map(item => [item.id, item]));
+  for (const id of ids) {
+    const item = byId.get(id);
+    if (!item) throw new Error(`Unknown requirement: ${id}.`);
+    if (["withdrawn", "needs-review"].includes(item.confirmation)) {
+      throw new Error(`Requirement ${id} needs a separate explicit keep decision; the batch was not applied.`);
+    }
+  }
+  // Validate the entire selection before cloning or applying any decision.
+  const selected = new Set(ids);
+  const result = structuredClone(snapshot);
+  for (const item of result.requirements) {
+    if (!selected.has(item.id)) continue;
+    item.confirmation = decision === "confirm" ? "user-confirmed" : "candidate";
+    item.disposition = `reviewer-${decision}`;
+  }
   result.revision += 1;
   return validateRequirements(result);
 }

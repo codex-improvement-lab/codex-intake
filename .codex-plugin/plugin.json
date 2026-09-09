@@ -1,6 +1,6 @@
 {
   "name": "codex-intake",
-  "version": "0.2.0-rc.1+codex.20260908002045",
+  "version": "0.3.0-rc.1+codex.20260909160007",
   "description": "Review changes from selected task sources while preserving manual edits and source-linked briefs.",
   "author": {
     "name": "Codex Intake contributors"

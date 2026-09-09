@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0-rc.1 — prerelease candidate
+
+- Confirm or revoke an explicit list of requirement IDs atomically against `--revision`; validate the complete selection before publishing one new snapshot. Preserve single-ID review and refuse overwrite.
+- Validate complete snapshots consistently with the standalone Proofline consumer, including nonconfirmed items, source references and duplicate identities.
+- Retain the 14/29-operation historical result; the separate simplified replay is 14/22, without a user-time or token-saving claim.
+- Include this version's release notes in generated marketplace packages; refresh the package/plugin identity.
+
 ## Unreleased — Proofline mainline candidate
 
 - Add scoped, durable requirement snapshots and explicit CLI review/revise/keep/exclude decisions. Browser saving uses the same snapshot model; saved files contain redacted text and pointers, not raw source bodies.

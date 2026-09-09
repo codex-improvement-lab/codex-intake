@@ -9,7 +9,16 @@ node scripts/requirements.mjs prepare --scope checkout --out candidates.json req
 node scripts/requirements.mjs review --input candidates.json --id checkout-R001 --decision confirm --out reviewed.json
 ```
 
-Review each selected ID explicitly. There is no automatic confirm-all switch. `--out` refuses to overwrite any existing file; omit it to write one JSON document to stdout. `prepare --previous reviewed.json --out proposed.json request.txt` updates a snapshot from explicitly selected files. The CLI supports text, logs and inventories; browser exports also support the existing selected image/OCR flow.
+Review each selected ID explicitly. To confirm or revoke several IDs together, repeat `--id` and supply the exact snapshot revision you read:
+
+```sh
+node scripts/requirements.mjs review --input candidates.json --revision 1 --id checkout-R001 --id checkout-R002 --decision confirm --out reviewed.json
+node scripts/requirements.mjs review --input reviewed.json --revision 2 --id checkout-R001 --id checkout-R002 --decision candidate --out reconsider.json
+```
+
+The whole selection is checked before changes: missing/unknown/duplicate IDs, stale revision, malformed snapshot or a withdrawn/needs-review item rejects the batch. Successful batches advance the snapshot revision once, preserving unselected items and requirement revisions. Already-confirmed or already-candidate items may be selected idempotently; the accepted decision batch still gets a new snapshot revision. `keep`, `revise` and `exclude` remain single-ID operations. Single-ID review supports `--revision` while retaining its prior optional-precondition behavior.
+
+There is no automatic confirm-all switch. `--out` writes complete bytes to a same-directory temporary file and atomically publishes a new file with exclusive hard-link creation; it refuses to overwrite and cleans the temporary file. Filesystems without that operation fail closed. Omit `--out` to write one JSON document to stdout. `prepare --previous reviewed.json --out proposed.json request.txt` updates a snapshot from explicitly selected files. The CLI supports text, logs and inventories; browser exports also support the existing selected image/OCR flow.
 
 Source basenames must be unique. Matching names retain source IDs and content changes advance source revisions; newly selected names get new IDs. Unselected files are not read. Renaming a source is a new selection, not an inferred identity match.
 
@@ -26,13 +35,12 @@ Requirement support digests use SHA-256. Source metadata imported from an older 
 ## Import and inspect
 
 ```sh
-proofline import-intake --input reviewed.json --output contract.json
-proofline doctor --contract contract.json --dependencies dependencies.json --json
-proofline run AC-01/tests --contract contract.json --dependencies dependencies.json -- node --test
-proofline query --contract contract.json --dependencies dependencies.json --gaps
+proofline doctor --contract reviewed.json --dependencies dependencies.json --json
+proofline run AC-01/tests --contract reviewed.json --dependencies dependencies.json -- node --test
+proofline query --contract reviewed.json --dependencies dependencies.json --gaps
 ```
 
-Only `user-confirmed` items enter the goal contract. Candidates, withdrawn and needs-review items remain named in the contract's Intake origin metadata. Proofline rejects foreign scopes and inconsistent confirmed-item mappings. Evidence associations are still explicit and reviewable; neither tool chooses which business requirement a test proves.
+Only `user-confirmed` items enter the normalized goal contract. Candidates, withdrawn and needs-review items remain named in its Intake origin metadata. Every direct and optional `import-intake` entry validates the entire snapshot before projection, including source registry/references and unconfirmed items. The canonical validator is `src/core/requirements-schema.js`; Proofline vendors a byte-identical copy to keep installations independent. Evidence associations remain explicit and reviewable; neither tool chooses which business requirement a test proves. `proofline import-intake --input reviewed.json --output contract.json` remains available when a separate normalized export is useful.
 
 The public Goal Delta projection uses generic requirement labels and scoped IDs. Acceptance text, private pointers and observation bindings stay upstream; Workprint receives only `workprint-profile/0.1`. Review public scope/ID labels before sharing.
 

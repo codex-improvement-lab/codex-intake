@@ -30,6 +30,7 @@ const requiredFiles = [
   "release/REPLACEMENT_CANDIDATE.json",
   "release/RELEASE_NOTES_v0.1.0.md",
   "release/RELEASE_NOTES_v0.2.0-rc.1.md",
+  "release/RELEASE_NOTES_v0.3.0-rc.1.md",
   "src/core/source-updates.js",
   "tests/source-updates.test.js",
   "vitest.config.js",

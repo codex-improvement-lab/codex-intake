@@ -2,7 +2,7 @@
 
 The current development branch adds requirement snapshots and coverage fixes; its candidate is described in [MAINLINE_CANDIDATE.md](../release/MAINLINE_CANDIDATE.md). The publication evidence below is historical. This candidate has no new hosted-CI, physical-Mac, fresh-task plugin activation or real-user result.
 
-Current preview: v0.2.0-rc.1. The v0.1.0 baseline was published separately first. Source archives include the text/log/inventory CLI, Web UI, local OCR setup, examples and repo-local plugin preparation.
+Current development candidate: v0.3.0-rc.1. The publication records below describe prior versions; the new candidate carries its own local validation. Source archives include the text/log/inventory CLI, Web UI, local OCR setup, examples and repo-local plugin preparation.
 
 | Surface | Evidence |
 | --- | --- |
