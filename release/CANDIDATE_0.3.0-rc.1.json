@@ -42,8 +42,8 @@
   },
   "boundaries": {
     "localHost": "Windows / Node 24.19.0",
-    "hostedCI": "not run by developer; owner to bind source-commit results",
-    "linuxValidation": "not claimed from local Windows",
+    "hostedCI": "Product owner reports all exact-source jobs succeeded; see ownerReportedCI. Not independently rerun by developer.",
+    "linuxValidation": "Hosted source CI result reported by product owner; local Windows and physical-device evidence remain separate.",
     "physicalMac": "not-run for this version",
     "freshTaskPluginActivation": "not-run",
     "realUsers": "not-run",
@@ -55,5 +55,12 @@
       "sha256": "52f79d57a0b33b129006410eb9803a921d92188a8b21fa5e0b5748bd031274be",
       "bytes": 1173481
     }
-  ]
+  ],
+  "ownerReportedCI": {
+    "sourceCommit": "3a5101a0a5878a92246b3f9436ca02e620e11097",
+    "jobs": 4,
+    "conclusion": "success",
+    "url": "https://github.com/codex-improvement-lab/codex-intake/actions/runs/34378877331",
+    "evidenceSource": "Product owner independently read and reported the exact source CI result in task coordination."
+  }
 }
