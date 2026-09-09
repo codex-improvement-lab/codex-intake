@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "lab-release-candidate/1",
+  "product": "codex-intake",
+  "version": "0.3.0-rc.1",
+  "status": "frozen-local-candidate-for-owner-validation",
+  "commissionDate": "2026-09-09",
+  "completedLocalDate": "2026-09-10",
+  "sourceCommit": "3a5101a0a5878a92246b3f9436ca02e620e11097",
+  "branch": "dev/proofline-mainline-2026-09-08",
+  "identity": {
+    "pluginManifestVersion": "0.3.0-rc.1+codex.20260909160007",
+    "pluginPayloadSha256": "ecc53152d9e552dc7e9c10159fa148b8938ae2e85292b39b923e31d0a6b7d8bc",
+    "hashedPayloadFilesExcludingMarker": 75,
+    "checkedFilesIncludingMarker": 76
+  },
+  "checks": {
+    "unitCliPlatform": 35,
+    "chromiumScenarios": 14,
+    "localReleaseCheck": "passed",
+    "extractedSourceCliWithoutDependencies": "passed",
+    "cleanFrozenInstallAndFullReleaseCheck": "passed",
+    "releaseNotesInPluginPackage": "RELEASE_NOTES_v0.3.0-rc.1.md verified",
+    "atomicBatch": "selected IDs/states/revision validated before output; duplicate/unknown/stale input rejected; input/output unchanged on errors"
+  },
+  "notes": [
+    "New-file output requires exclusive atomic hard-link publication; unsupported filesystems fail closed.",
+    "Offline clean dependency installation lacked the chi_sim cache; frozen-lockfile installation fetched the pinned dependency and full validation passed.",
+    "Batch review is a caller declaration, not an authenticated human signature or evidence of test adequacy."
+  ],
+  "costEvidence": {
+    "kind": "non-blind-controlled-internal-maintenance-replay",
+    "original": {
+      "baseline": 14,
+      "assisted": 29
+    },
+    "simplified": {
+      "baseline": 14,
+      "assisted": 22
+    },
+    "deletedAssistedOperations": 7,
+    "claim": "Still exceeds the strong baseline; no human-time, agent-investigation-time or model-token benefit established"
+  },
+  "boundaries": {
+    "localHost": "Windows / Node 24.19.0",
+    "hostedCI": "not run by developer; owner to bind source-commit results",
+    "linuxValidation": "not claimed from local Windows",
+    "physicalMac": "not-run for this version",
+    "freshTaskPluginActivation": "not-run",
+    "realUsers": "not-run",
+    "publication": "owner-controlled; no developer push/tag/release/account actions"
+  },
+  "artifacts": [
+    {
+      "file": "codex-intake-0.3.0-rc.1-source.zip",
+      "sha256": "52f79d57a0b33b129006410eb9803a921d92188a8b21fa5e0b5748bd031274be",
+      "bytes": 1173481
+    }
+  ]
+}
