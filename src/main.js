@@ -122,7 +122,7 @@ function syncUpdateControls() {
     elements.demo, elements.emptyDemo, ...elements.sourceList.querySelectorAll("[data-remove],[data-ocr],[data-edit-source],[data-replace-file]"),
     elements.composer.querySelector("button[type=submit]")];
   for (const control of controls) if (control) control.disabled = sourceBusy || Boolean(pendingUpdate);
-  elements.dropzone.setAttribute("aria-disabled", String(sourceBusy || Boolean(pendingUpdate)));
+  elements.dropzone.dataset.disabled = String(sourceBusy || Boolean(pendingUpdate));
   for (const control of elements.briefContent.querySelectorAll("input,textarea,button")) control.disabled = Boolean(pendingUpdate);
   for (const control of [elements.downloadJson, elements.downloadMarkdown, elements.downloadRequirements, elements.copy]) control.disabled = Boolean(pendingUpdate);
   document.querySelector("#undo-source-update").disabled = sourceBusy || Boolean(pendingUpdate);
@@ -665,9 +665,6 @@ elements.chooseFiles.addEventListener("click", (event) => {
 elements.dropzone.addEventListener("click", (event) => {
   if (event.target.closest("button,input") || !mayChangeSources()) return;
   elements.fileInput.click();
-});
-elements.dropzone.addEventListener("keydown", (event) => {
-  if ((event.key === "Enter" || event.key === " ") && mayChangeSources()) { event.preventDefault(); elements.fileInput.click(); }
 });
 elements.fileInput.addEventListener("change", (event) => { void addFiles(event.target.files); event.target.value = ""; });
 elements.replaceFileInput.addEventListener("change", (event) => { void addFiles(event.target.files, replacementSourceId); event.target.value = ""; });

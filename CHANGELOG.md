@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — keyboard file selection
+
+- Make the file dropzone one keyboard stop through its native Choose files button while retaining click and drag/drop behavior. Remove the nested button semantics that gave the same action two Tab stops.
+
 ## 0.3.0-rc.1 — prerelease candidate
 
 - Confirm or revoke an explicit list of requirement IDs atomically against `--revision`; validate the complete selection before publishing one new snapshot. Preserve single-ID review and refuse overwrite.
