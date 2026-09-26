@@ -1,0 +1,373 @@
+{
+  "schemaVersion": "1.1",
+  "engine": {
+    "name": "codex-intake-rules",
+    "version": "0.2.0",
+    "mode": "local-deterministic"
+  },
+  "title": "An editor's reviewed intake",
+  "objective": "Make the requested behavior demonstrably true: Must keep every reviewed requirement.",
+  "fieldOwnership": {
+    "title": "user-edited",
+    "objective": "rule-derived"
+  },
+  "situation": "3 sources; 8 extracted signals; 2 privacy risks.",
+  "coverage": {
+    "scope": "rule-detected-signals",
+    "detectedSignals": 8,
+    "acceptanceSignals": 4,
+    "representedSignals": 4,
+    "omittedSignals": 0,
+    "dispositions": [
+      {
+        "findingId": "F-S02-002-problem",
+        "candidateIds": [
+          "D03",
+          "D04"
+        ],
+        "disposition": "candidate"
+      },
+      {
+        "findingId": "F-S01-002-requirement",
+        "candidateIds": [
+          "D01"
+        ],
+        "disposition": "candidate"
+      },
+      {
+        "findingId": "F-S01-003-requirement",
+        "candidateIds": [
+          "D02"
+        ],
+        "disposition": "candidate"
+      },
+      {
+        "findingId": "F-S02-001-command",
+        "candidateIds": [
+          "D05"
+        ],
+        "disposition": "candidate"
+      }
+    ]
+  },
+  "primaryPointer": {
+    "sourceId": "S01",
+    "sourceRevision": 2,
+    "locator": "L2",
+    "excerpt": "Must keep every reviewed requirement."
+  },
+  "doneWhen": [
+    {
+      "id": "D01",
+      "text": "The requested behavior is observably satisfied: “Must keep every reviewed requirement.”",
+      "confidence": "rule-derived",
+      "rule": "requirement-satisfied",
+      "findingId": "F-S01-002-requirement",
+      "authorship": "rule-derived",
+      "confirmation": "candidate",
+      "pointer": {
+        "sourceId": "S01",
+        "sourceRevision": 2,
+        "locator": "L2",
+        "excerpt": "Must keep every reviewed requirement."
+      }
+    },
+    {
+      "id": "D02",
+      "text": "The requested behavior is observably satisfied: “Must keep the source version visible.”",
+      "confidence": "rule-derived",
+      "rule": "requirement-satisfied",
+      "findingId": "F-S01-003-requirement",
+      "authorship": "rule-derived",
+      "confirmation": "candidate",
+      "pointer": {
+        "sourceId": "S01",
+        "sourceRevision": 2,
+        "locator": "L3",
+        "excerpt": "Must keep the source version visible."
+      }
+    },
+    {
+      "id": "D03",
+      "text": "The recorded failure no longer occurs: “ERROR TypeError: Cannot read properties of undefined (reading 'locator')”",
+      "confidence": "rule-derived",
+      "rule": "failure-removed",
+      "findingId": "F-S02-002-problem",
+      "authorship": "rule-derived",
+      "confirmation": "candidate",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L2",
+        "excerpt": "ERROR TypeError: Cannot read properties of undefined (reading 'locator')"
+      }
+    },
+    {
+      "id": "D04",
+      "text": "Automated regression coverage exercises the observed failure path and passes: “ERROR TypeError: Cannot read properties of undefined (reading 'locator')”",
+      "confidence": "rule-derived",
+      "rule": "regression-coverage",
+      "findingId": "F-S02-002-problem",
+      "authorship": "rule-derived",
+      "confirmation": "candidate",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L2",
+        "excerpt": "ERROR TypeError: Cannot read properties of undefined (reading 'locator')"
+      }
+    },
+    {
+      "id": "D05",
+      "text": "The recorded verification command completes successfully: pnpm test -- checkout-export",
+      "confidence": "rule-derived",
+      "rule": "command-passes",
+      "findingId": "F-S02-001-command",
+      "authorship": "rule-derived",
+      "confirmation": "candidate",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L1",
+        "excerpt": "pnpm test -- checkout-export"
+      }
+    },
+    {
+      "id": "D06",
+      "text": "The exported handoff contains no unmasked authorization token, personal home path.",
+      "confidence": "rule-derived",
+      "rule": "privacy-cleared",
+      "findingId": null,
+      "authorship": "rule-derived",
+      "confirmation": "candidate",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L4",
+        "excerpt": "Authorization: Bearer <redacted:authorization-token>"
+      }
+    },
+    {
+      "id": "E-doneWhen-1",
+      "text": "Keep the user's reviewed acceptance check.",
+      "confidence": "explicit",
+      "rule": "requirement-satisfied",
+      "findingId": "F-S01-002-requirement",
+      "authorship": "user-authored",
+      "confirmation": "user-confirmed",
+      "pointer": {
+        "sourceId": "USER",
+        "locator": "manual",
+        "excerpt": "Requirement explicitly retained by user"
+      },
+      "previousPointer": {
+        "sourceId": "S01",
+        "sourceRevision": 1,
+        "locator": "L2",
+        "excerpt": "Need the Markdown export to work with Windows paths and keep every source link."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-S02-002-problem",
+      "category": "problem",
+      "text": "ERROR TypeError: Cannot read properties of undefined (reading 'locator')",
+      "confidence": "rule-derived",
+      "rule": "problem-signal",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L2",
+        "excerpt": "ERROR TypeError: Cannot read properties of undefined (reading 'locator')"
+      }
+    },
+    {
+      "id": "F-S01-002-requirement",
+      "category": "requirement",
+      "text": "Must keep every reviewed requirement.",
+      "confidence": "rule-derived",
+      "rule": "requirement-language",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S01",
+        "sourceRevision": 2,
+        "locator": "L2",
+        "excerpt": "Must keep every reviewed requirement."
+      }
+    },
+    {
+      "id": "F-S01-003-requirement",
+      "category": "requirement",
+      "text": "Must keep the source version visible.",
+      "confidence": "rule-derived",
+      "rule": "requirement-language",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S01",
+        "sourceRevision": 2,
+        "locator": "L3",
+        "excerpt": "Must keep the source version visible."
+      }
+    },
+    {
+      "id": "F-S02-001-command",
+      "category": "command",
+      "text": "pnpm test -- checkout-export",
+      "confidence": "rule-derived",
+      "rule": "command-shape",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L1",
+        "excerpt": "pnpm test -- checkout-export"
+      }
+    },
+    {
+      "id": "F-S02-003-path",
+      "category": "path",
+      "text": "at renderPointer (<redacted:personal-home-path>\\codex-intake\\src\\core\\export.js:42:18)",
+      "confidence": "rule-derived",
+      "rule": "path-shape",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L3",
+        "excerpt": "at renderPointer (<redacted:personal-home-path>\\codex-intake\\src\\core\\export.js:42:18)"
+      }
+    },
+    {
+      "id": "F-S03-001-path",
+      "category": "path",
+      "text": "file src/core/export.js",
+      "confidence": "rule-derived",
+      "rule": "path-shape",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S03",
+        "sourceRevision": 1,
+        "locator": "entry 1",
+        "excerpt": "file src/core/export.js"
+      }
+    },
+    {
+      "id": "F-S03-002-path",
+      "category": "path",
+      "text": "file src/ui/download.js",
+      "confidence": "rule-derived",
+      "rule": "path-shape",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S03",
+        "sourceRevision": 1,
+        "locator": "entry 2",
+        "excerpt": "file src/ui/download.js"
+      }
+    },
+    {
+      "id": "F-S03-003-path",
+      "category": "path",
+      "text": "file tests/export.test.js",
+      "confidence": "rule-derived",
+      "rule": "path-shape",
+      "authorship": "rule-derived",
+      "reviewStatus": "current",
+      "pointer": {
+        "sourceId": "S03",
+        "sourceRevision": 1,
+        "locator": "entry 3",
+        "excerpt": "file tests/export.test.js"
+      }
+    }
+  ],
+  "privacyRisks": [
+    {
+      "id": "R-S02-02",
+      "type": "authorization-token",
+      "label": "authorization token",
+      "severity": "critical",
+      "maskedPreview": "Authorization: Bearer <redacted:authorization-token>",
+      "guidance": "Remove or rotate this value before sharing the brief.",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L4",
+        "excerpt": "Authorization: Bearer <redacted:authorization-token>"
+      }
+    },
+    {
+      "id": "R-S02-01",
+      "type": "personal-home-path",
+      "label": "personal home path",
+      "severity": "medium",
+      "maskedPreview": "at renderPointer (<redacted:personal-home-path>\\codex-intake\\src\\core\\export.js:42:18)",
+      "guidance": "Confirm this context is necessary before sharing.",
+      "pointer": {
+        "sourceId": "S02",
+        "sourceRevision": 1,
+        "locator": "L3",
+        "excerpt": "at renderPointer (<redacted:personal-home-path>\\codex-intake\\src\\core\\export.js:42:18)"
+      }
+    }
+  ],
+  "gaps": [],
+  "sources": [
+    {
+      "id": "S01",
+      "revision": 2,
+      "name": "checkout-notes.txt",
+      "kind": "text",
+      "mimeType": "text/plain",
+      "byteSize": 98,
+      "digest": "c0f37abc",
+      "lineCount": 3,
+      "ocr": null,
+      "rawContentIncluded": false
+    },
+    {
+      "id": "S02",
+      "revision": 1,
+      "name": "checkout-export.log",
+      "kind": "log",
+      "mimeType": "text/plain",
+      "byteSize": 216,
+      "digest": "ea1090a0",
+      "lineCount": 4,
+      "ocr": null,
+      "rawContentIncluded": false
+    },
+    {
+      "id": "S03",
+      "revision": 1,
+      "name": "affected-files.files",
+      "kind": "file-list",
+      "mimeType": "text/plain",
+      "byteSize": 73,
+      "digest": "76398983",
+      "lineCount": 3,
+      "ocr": null,
+      "rawContentIncluded": false
+    }
+  ],
+  "sourceHistory": [
+    {
+      "id": "S01",
+      "revision": 1,
+      "name": "checkout-notes.txt",
+      "kind": "text",
+      "digest": "5d68027e",
+      "lineCount": 4,
+      "rawContentIncluded": false
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 ## Unreleased — keyboard file selection
 
 - Make the file dropzone one keyboard stop through its native Choose files button while retaining click and drag/drop behavior. Remove the nested button semantics that gave the same action two Tab stops.
+- Add a five-step illustrated source-update walkthrough with the actual demo JSON export, covering explicit requirement confirmation and retention after a source revision.
 
 ## 0.3.0-rc.1 — prerelease candidate
 
